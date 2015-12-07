@@ -6,7 +6,6 @@ Plugin\OmisePaymentGateway\Entity\OmiseConfig:
         id:
             type: integer
             nullable: false
-            unsigned: false
             id: true
             generator:
                 strategy: AUTO
@@ -18,7 +17,6 @@ Plugin\OmisePaymentGateway\Entity\OmiseConfig:
         delete_flg:
             type: tinyint
             nullable: false
-            unsigned: false
             default: '0'
         create_date:
             type: datetime
