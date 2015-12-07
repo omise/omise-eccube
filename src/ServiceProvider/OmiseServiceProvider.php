@@ -1,5 +1,5 @@
 <?php
-namespace Plugin\OmisePayment\ServiceProvider;
+namespace Plugin\OmisePaymentGateway\ServiceProvider;
 
 use Eccube\Application;
 use Silex\Application as BaseApplication;

@@ -1,5 +1,5 @@
 <?php
-namespace Plugin\OmisePayment\Controller;
+namespace Plugin\OmisePaymentGateway\Controller;
 use Eccube\Application;
 
 class ConfigController {

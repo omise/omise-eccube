@@ -1,5 +1,5 @@
 <?php
-namespace Plugin\OmisePayment;
+namespace Plugin\OmisePaymentGateway;
 
 use Eccube\Plugin\AbstractPluginManager;
 class PluginManager extends AbstractPluginManager {

@@ -1,0 +1,29 @@
+Plugin\OmisePaymentGateway\Entity\OmiseConfig:
+    type: entity
+    table: plg_omise_config
+    repositoryClass: Plugin\OmisePaymentGateway\Repository\OmiseConfigRepository
+    id:
+        id:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        info:
+            type: text
+            nullable: false
+            default: ''
+        delete_flg:
+            type: tinyint
+            nullable: false
+            unsigned: false
+            default: '0'
+        create_date:
+            type: datetime
+            nullable: false
+        update_date:
+            type: datetime
+            nullable: false
+    lifecycleCallbacks: {  }

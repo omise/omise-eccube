@@ -1,5 +1,5 @@
 <?php
-namespace Plugin\OmisePayment\Entity;
+namespace Plugin\OmisePaymentGateway\Entity;
 
 class OmiseConfig {
 	private $id;
