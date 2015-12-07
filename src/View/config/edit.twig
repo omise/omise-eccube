@@ -1,0 +1,63 @@
+{#
+Copyright(c) 2015 Omise Co., Ltd. All rights reserved.
+https://www.omise.co/
+#}
+{% extends 'default_frame.twig' %}
+
+{% block javascript %}
+    <script type="text/javascript">
+
+    </script>
+{% endblock %}
+
+{% block title %}{{ tpl_subtitle }}{% endblock %}
+
+{% form_theme form 'Form/bootstrap_3_horizontal_layout.html.twig' %}
+{% block main %}
+
+    <div class="row" id="aside_wrap">
+        <form name="form1" role="form" novalidate class="form-horizontal" id="point_form" method="post" action="">
+            {{ form_widget(form._token) }}
+            <div class="col-md-9">
+
+                <div class="box">
+                	<div class="box-header">
+                		<h3 class="box-title">{{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}のご利用にあたって</h3>
+                	</div>
+                    <div class="box-body">
+                        <div>
+                            {{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}をご利用頂くにあたり、
+                            {{ app.config.OmisePaymentGateway.const.OMISE_COMPANY_NAME }}との契約が必要です。
+                            <a href="" >{{ app.config.OmisePaymentGateway.const.OMISE_URL }}</a>からお申し込みをお願い致します。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">アカウントの設定</h3>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-3" id="aside_column">
+                <div class="col_inner">
+                    <div class="box no-header">
+                        <div class="box-body">
+                            <div class="row text-center">
+                                <div class="col-sm-6 col-sm-offset-3 col-md-12 col-md-offset-0">
+                                    <button class="btn btn-primary btn-block btn-lg" onclick="document.form1.submit();">
+                                        登録する
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+            </div>
+            <!-- /.col -->
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,22 @@
+#プラグイン名
+name: OmisePaymentGateway-Omise決済プラグイン
+#プラグインコード
+code: OmisePaymentGateway
+#バージョン
+version: 0.1
+#サービスプロバイダ
+service:
+    - OmiseServiceProvider
+#イベント名
+event: OmisePaymentGateway
+orm.path:
+	- /Resource/doctrine
+migration.path:
+	- /migration
+#定数
+const:
+	OMISE_COMPANY_NAME: Omise Co., Ltd.
+	OMISE_PLUGIN_NAME: Omise Payment Gateway
+	OMISE_PLUGIN_VERSION: 0.1
+	OMISE_LIB_VERSION: 2.4.0
+	OMISE_URL: https://www.omise.co/
