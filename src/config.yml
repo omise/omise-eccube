@@ -12,7 +12,7 @@ event: OmisePaymentGateway
 orm.path:
 	- /Resource/doctrine
 migration.path:
-	- /migration
+	- /Migration
 #定数
 const:
 	OMISE_COMPANY_NAME: Omise Co., Ltd.
