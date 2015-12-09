@@ -9,7 +9,7 @@ class OmiseServiceProvider implements ServiceProviderInterface {
 		// ルーティングのとうろく
 		$app->match(
 				'/' . $app['config']['admin_route'] . '/plugin/OmisePaymentGateway/config',
-				'Plugin\\OmisePaymentGateway\\Controller\\ConfigController::index'
+				'\\Plugin\\OmisePaymentGateway\\Controller\\ConfigController::index'
 				)->bind('plugin_OmisePaymentGateway_config');
 		
 		// Form

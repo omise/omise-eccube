@@ -17,7 +17,11 @@ class Version20151207000000 extends AbstractMigration {
 	}
 	
 	private function dropOmiseConfigTable(Schema $schema) {
-		$schema->dropTable('plg_omise_config');
+		$tableName = 'plg_omise_config';
+		
+		if($schema->hasTable($tableName)) {
+			$schema->dropTable($tableName);
+		}
 	}
 	
 	/**
@@ -37,7 +41,7 @@ class Version20151207000000 extends AbstractMigration {
 		
 		if(!$table->hasColumn('id')) $table->addColumn('id', 'integer', array('autoincrement' => true));
 		if(!$table->hasColumn('info')) $table->addColumn('info', 'text', array('notnull' => false));
-		if(!$table->hasColumn('delete_flg'))$table->addColumn('delete_flg', 'tinyint', array('notnull' => true, 'default' => 0));
+		if(!$table->hasColumn('delete_flg'))$table->addColumn('delete_flg', 'smallint', array('notnull' => true, 'default' => 0));
 		if(!$table->hasColumn('create_date'))$table->addColumn('create_date', 'datetime', array('notnull' => true));
 		if(!$table->hasColumn('update_date'))$table->addColumn('update_date', 'datetime', array('notnull' => true));
 		
