@@ -6,22 +6,25 @@ use Doctrine\DBAL\Schema\Schema;
 
 class Version20151207000000 extends AbstractMigration {
 	/**
-	 * データベース変更前処理
-	 */
-	public function preUp(Schema $schema) { }
-	
-	/**
 	 * データベース変更処理
 	 */
 	public function up(Schema $schema) {
 		$this->createOmiseConfigTable($schema);
 	}
 	
+	public function down(Schema $schema) {
+		$this->dropOmiseConfigTable($schema);
+	}
+	
+	private function dropOmiseConfigTable(Schema $schema) {
+		$schema->dropTable('plg_omise_config');
+	}
+	
 	/**
 	 * OmiseConfigテーブルの作成
 	 * @param Schema $schema
 	 */
-	public function createOmiseConfigTable(Schema $schema) {
+	private function createOmiseConfigTable(Schema $schema) {
 		$tableName = 'plg_omise_config';
 		
 		if(!$schema->hasTable($tableName)) {

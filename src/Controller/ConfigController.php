@@ -3,7 +3,7 @@ namespace Plugin\OmisePaymentGateway\Controller;
 use Eccube\Application;
 
 class ConfigController {
-	public function edit(Application $app) {
+	public function edit(Application $app, Request $request) {
 		
 		return $app['view']->render('OmisePaymentGateway/View/config/edit.twig',
             array(

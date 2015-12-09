@@ -15,7 +15,7 @@ Plugin\OmisePaymentGateway\Entity\OmiseConfig:
             nullable: false
             default: ''
         delete_flg:
-            type: tinyint
+            type: smallint
             nullable: false
             default: '0'
         create_date:

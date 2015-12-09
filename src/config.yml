@@ -10,13 +10,13 @@ service:
 #イベント名
 event: OmisePaymentGateway
 orm.path:
-	- /Resource/doctrine
+    - /Resource/doctrine
 migration.path:
-	- /Migration
+    - /Migration
 #定数
 const:
-	OMISE_COMPANY_NAME: Omise Co., Ltd.
-	OMISE_PLUGIN_NAME: Omise Payment Gateway
-	OMISE_PLUGIN_VERSION: 0.1
-	OMISE_LIB_VERSION: 2.4.0
-	OMISE_URL: https://www.omise.co/
+    OMISE_COMPANY_NAME: Omise Co., Ltd.
+    OMISE_PLUGIN_NAME: Omise Payment Gateway
+    OMISE_PLUGIN_VERSION: 0.1
+    OMISE_LIB_VERSION: 2.4.0
+    OMISE_URL: https://www.omise.co/
