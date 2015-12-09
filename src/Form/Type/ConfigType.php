@@ -25,7 +25,7 @@ class ConfigType extends AbstractType {
         // 設定情報の初期化
         $this->init();
 
-        $configService = $this->app['eccube.plugin.service.omise_config'];
+        // $configService = $this->app['eccube.plugin.service.omise_config'];
 
         // フォーム内容の設定
         $builder
