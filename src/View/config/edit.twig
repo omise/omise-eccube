@@ -1,5 +1,5 @@
 {#
-Copyright(c) 2015 Omise Co., Ltd. All rights reserved.
+(c) 2015 Omise Co., Ltd.
 https://www.omise.co/
 #}
 {% extends 'default_frame.twig' %}
@@ -21,13 +21,13 @@ https://www.omise.co/
 
                 <div class="box">
                 	<div class="box-header">
-                		<h3 class="box-title">のご利用にあたって</h3>
+                		<h3 class="box-title">{{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}のご利用にあたって</h3>
                 	</div>
                     <div class="box-body">
                         <div>
-                            をご利用頂くにあたり、
-                            との契約が必要です。
-                            <a href="" ></a>からお申し込みをお願い致します。
+                            {{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}をご利用頂くにあたり、
+                            {{ app.config.OmisePaymentGateway.const.OMISE_COMPANY_NAME }}との契約が必要です。
+                            <a href="" >{{ app.config.OmisePaymentGateway.const.OMISE_URL }}</a>からお申し込みをお願い致します。
                         </div>
                     </div>
                 </div>

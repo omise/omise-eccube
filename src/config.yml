@@ -13,3 +13,8 @@ orm.path:
     - /Resource/doctrine
 migration.path:
     - /Migration
+const: 
+    OMISE_PLUGIN_NAME: OmisePaymentGateway
+    OMISE_COMPANY_NAME: Omise Co., Ltd.
+    OMISE_URL: https://www.omise.co/
+    
