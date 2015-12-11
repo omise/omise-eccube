@@ -10,9 +10,13 @@ class ConfigController {
 	public function edit(Application $app, Request $request) {
 		$this->app = $app;
 		$configService = $this->app['eccube.plugin.service.omise_pg_config'];
+        $config = $configService->getPluginConfig();
+        
 		return $app['view']->render('OmisePaymentGateway/View/config/edit.twig',
             array(
-            	'title' => 'Omiseセッティング',
+            	'plugin_name' => $config['name'],
+            	'company_name' => $config['const']['OMISE_COMPANY_NAME'],
+            	'url_ja' => $config['const']['OMISE_URL_JA'],
             ));
 	}
 }

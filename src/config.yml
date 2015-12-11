@@ -14,7 +14,6 @@ orm.path:
 migration.path:
     - /Migration
 const: 
-    OMISE_PLUGIN_NAME: Omise決済プラグイン
     OMISE_COMPANY_NAME: Omise Co., Ltd.
     OMISE_URL: https://www.omise.co/
     OMISE_URL_JA: https://www.omise.co/?locale=ja
