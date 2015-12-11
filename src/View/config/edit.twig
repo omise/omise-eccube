@@ -10,7 +10,7 @@ https://www.omise.co/
     </script>
 {% endblock %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}{% endblock %}
 
 
 {% block main %}
@@ -21,13 +21,13 @@ https://www.omise.co/
 
                 <div class="box">
                 	<div class="box-header">
-                		<h3 class="box-title">{{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}のご利用にあたって</h3>
+                		<h3 class="box-title">{{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}のご利用の前に</h3>
                 	</div>
                     <div class="box-body">
                         <div>
                             {{ app.config.OmisePaymentGateway.const.OMISE_PLUGIN_NAME }}をご利用頂くにあたり、
-                            {{ app.config.OmisePaymentGateway.const.OMISE_COMPANY_NAME }}との契約が必要です。
-                            <a href="" >{{ app.config.OmisePaymentGateway.const.OMISE_URL }}</a>からお申し込みをお願い致します。
+                            {{ app.config.OmisePaymentGateway.const.OMISE_COMPANY_NAME }}との契約が必要です。<br/>
+                            <a href="{{ app.config.OmisePaymentGateway.const.OMISE_URL_JA }}" target="_blank" >こちら</a>からお申し込みをお願い致します。
                         </div>
                     </div>
                 </div>
