@@ -10,13 +10,9 @@ class OmiseServiceProvider implements ServiceProviderInterface {
 		// ルーティングのとうろく
 		$app->match(
 				'/' . $app['config']['admin_route'] . '/plugin/OmisePaymentGateway/config',
-				'\\Plugin\\OmisePaymentGateway\\Controller\\ConfigController::index'
+				'\\Plugin\\OmisePaymentGateway\\Controller\\ConfigController::edit'
 				)->bind('plugin_OmisePaymentGateway_config');
 		
-		// TODO Service\OmiseConfigServiceを作る
-		$app['eccube.plugin.service.omise_config'] = $app->share(function () use ($app) {
-			return new \Plugin\RemisePayment\Service\RemiseConfigService($app);
-		});
 	}
 	
 	public function boot(BaseApplication $app) { }
