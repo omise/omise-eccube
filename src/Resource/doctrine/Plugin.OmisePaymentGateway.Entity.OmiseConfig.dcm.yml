@@ -10,6 +10,10 @@ Plugin\OmisePaymentGateway\Entity\OmiseConfig:
             generator:
                 strategy: AUTO
     fields:
+        code:
+            type: text
+            nullable: false
+            default: ''
         info:
             type: text
             nullable: false

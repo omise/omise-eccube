@@ -3,6 +3,7 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
+use Symfony\Component\Yaml\Yaml;
 
 class Version20151207000000 extends AbstractMigration {
 	/**
@@ -15,6 +16,10 @@ class Version20151207000000 extends AbstractMigration {
 	public function down(Schema $schema) {
 		$this->dropOmiseConfigTable($schema);
 	}
+	
+    public function postUp(Schema $schema) {
+        $this->insertOmiseConfig();
+    }
 	
 	private function dropOmiseConfigTable(Schema $schema) {
 		$tableName = 'plg_omise_config';
@@ -40,11 +45,23 @@ class Version20151207000000 extends AbstractMigration {
 		}
 		
 		if(!$table->hasColumn('id')) $table->addColumn('id', 'integer', array('autoincrement' => true));
+		if(!$table->hasColumn('code')) $table->addColumn('code', 'text', array('notnull' => false));
 		if(!$table->hasColumn('info')) $table->addColumn('info', 'text', array('notnull' => false));
 		if(!$table->hasColumn('delete_flg'))$table->addColumn('delete_flg', 'smallint', array('notnull' => true, 'default' => 0));
 		if(!$table->hasColumn('create_date'))$table->addColumn('create_date', 'datetime', array('notnull' => true));
 		if(!$table->hasColumn('update_date'))$table->addColumn('update_date', 'datetime', array('notnull' => true));
 		
 		if($isCreateedTable) $table->setPrimaryKey(array('id'));
+	}
+	
+	private function insertOmiseConfig() {
+		$tableName = 'plg_omise_config';
+		
+        $code = 'OmisePaymentGateway';
+        $createDate = date('Y-m-d H:i:s');
+        
+        $insert = "INSERT INTO $tableName (code, info, create_date, update_date)"
+        		." VALUES ('$code', '', '$createDate', '$createDate');";
+        $this->connection->executeUpdate($insert);
 	}
 }
