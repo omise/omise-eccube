@@ -22,36 +22,28 @@ class ConfigType extends AbstractType {
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options) {
         // 設定情報の初期化
-        $this->init();
-
-        $configService = $this->app['eccube.plugin.service.omise_pg_config'];
+        if (!isset($this->info)) $this->info = array();
+		if (!array_key_exists('pkey', $this->info)) $this->info['pkey'] = null;
+		if (!array_key_exists('skey', $this->info)) $this->info['skey'] = null;
 
         // フォーム内容の設定
         $builder
             ->add('pkey', 'text', array(
                 'label' => 'Public key',
-                'attr' => array(
-                    'class' => '',
-                	'maxlength' => 29,
-                ),
                 'data' => $this->info['pkey'],
                 'constraints' => array(
-                    new Assert\NotBlank(array('message' => '※ Public keyが入力されていません。')),
-                    new Assert\Length(array('max' => 29, 'maxMessage' => '※ Public keyは25桁（Test29桁）の文字列です。')),
-                    new Assert\Length(array('min' => 25, 'minMessage' => '※ Public keyは25桁（Test29桁）の文字列です。')),
+                    new Assert\NotBlank(array('message' => 'Public keyが入力されていません。')),
+                    new Assert\Length(array('max' => 29, 'maxMessage' => 'Public keyは25桁（Test29桁）の文字列です。')),
+                    new Assert\Length(array('min' => 25, 'minMessage' => 'Public keyは25桁（Test29桁）の文字列です。')),
                 ),
             ))
             ->add('skey', 'text', array(
                 'label' => 'Secret key',
-                'attr' => array(
-                    'class' => '',
-                	'maxlength' => 29,
-                ),
                 'data' => $this->info['skey'],
                 'constraints' => array(
-                    new Assert\NotBlank(array('message' => '※ Secret keyが入力されていません。')),
-                    new Assert\Length(array('max' => 29, 'maxMessage' => '※ ホスト番号は25桁（Test29桁）の数字です。')),
-                    new Assert\Length(array('min' => 25, 'minMessage' => '※ ホスト番号は25桁（Test29桁）の数字です。')),
+                    new Assert\NotBlank(array('message' => 'Secret keyが入力されていません。')),
+                    new Assert\Length(array('max' => 29, 'maxMessage' => 'ホスト番号は25桁（Test29桁）の数字です。')),
+                    new Assert\Length(array('min' => 25, 'minMessage' => 'ホスト番号は25桁（Test29桁）の数字です。')),
                 ),
             ))
             ->addEventSubscriber(new \Eccube\Event\FormEventSubscriber());

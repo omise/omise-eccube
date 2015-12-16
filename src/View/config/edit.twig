@@ -16,7 +16,8 @@ https://www.omise.co/
 {% block main %}
 
     <div class="row" id="aside_wrap">
-        <form name="form1" role="form" novalidate class="form-horizontal" id="point_form" method="post" action="">
+        <form novalidate method="post" action="">
+        {{ form_widget(form._token) }}
             <div class="col-md-9">
 
                 <div class="box">
@@ -38,20 +39,20 @@ https://www.omise.co/
                     </div>
                     <div class="box-body">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label required">Public key<span class="label label-danger">必須</span></label>
+                            <label class="col-sm-3 control-label required">Public key　<span class="label label-danger">必須</span></label>
                             <div class="row">
-                                <div class="col-sm-3">
-                                    {{ form_widget(form.pkey, { 'attr': {'placeholder': 'pkey_xxxxxxxxxxxxxxxxxxx'} }) }}
+                                <div class="col-sm-8">
+                                    {{ form_widget(form.pkey, { 'attr': {'placeholder': 'pkey_xxxxxxxxxxxxxxxxxxx', 'class': 'form-control'} }) }}
                                     {{ form_errors(form.pkey) }}
                                     
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label required">Secret key<span class="label label-danger">必須</span></label>
+                            <label class="col-sm-3 control-label required">Secret key　<span class="label label-danger">必須</span></label>
                             <div class="row">
-                                <div class="col-sm-3 {% if form.host_id.vars.errors is not empty %}has-error{% endif %}">
-                                    {{ form_widget(form.skey, { 'attr': {'placeholder': 'skey_xxxxxxxxxxxxxxxxxxx'} }) }}
+                                <div class="col-sm-8">
+                                    {{ form_widget(form.skey, { 'attr': {'placeholder': 'skey_xxxxxxxxxxxxxxxxxxx', 'class': 'form-control'} }) }}
                                     {{ form_errors(form.skey) }}
                                 </div>
                             </div>

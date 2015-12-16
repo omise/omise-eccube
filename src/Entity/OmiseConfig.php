@@ -43,19 +43,28 @@ class OmiseConfig {
 	}
 	
 	/**
-	 * 
-	 * @return string
+	 * シリアライズされた文字列が欲しい場合$serializedをtrueにすること
+	 * @return mixed
 	 */
-	public function getInfo() {
-		return $this->info;
+	public function getInfo($serialized = false) {
+		if($serialized) {
+			return $this->info;
+		} else {
+			return unserialize($this->info);
+		}
 	}
 	/**
-	 * 
-	 * @param string $info
+	 * $infoがシリアライズされている文字列の場合$serializedをtrueにすること。
+	 * @param mixed $info
+	 * @param boolean $serialized
 	 * @return \Plugin\OmisePayment\Entity\OmiseConfig
 	 */
-	public function setInfo($info) {
-		$this->info = $info;
+	public function setInfo($info, $serialized = false) {
+		if($unserialized) {
+			$this->info = $info;
+		} else {
+			$this->info = serialize($info);
+		}
 		return $this;
 	}
 	
@@ -109,4 +118,9 @@ class OmiseConfig {
 		$this->update_date = $update_date;
 		return $this;
 	}
+	
+    public function __toString()
+    {
+        return $this->getCode();
+    }
 }
