@@ -4,6 +4,7 @@ namespace Plugin\OmisePaymentGateway\Entity;
 class OmiseConfig {
 	private $id;
     private $code;
+    private $payment_id;
 	private $info;
 	private $delete_flg;
 	private $create_date;
@@ -43,6 +44,23 @@ class OmiseConfig {
 	}
 	
 	/**
+	 * @return integer
+	 */
+	public function setPaymentId() {
+		$this->payment_id;
+	}
+	
+	/**
+	 * @param integer $payment_id
+	 * @return \Plugin\OmisePayment\Entity\OmiseConfig
+	 */
+	public function setPaymentId($payment_id) {
+		$this->payment_id = $payment_id;
+		
+		return $this;
+	}
+	
+	/**
 	 * シリアライズされた文字列が欲しい場合$serializedをtrueにすること
 	 * @return mixed
 	 */
@@ -60,7 +78,7 @@ class OmiseConfig {
 	 * @return \Plugin\OmisePayment\Entity\OmiseConfig
 	 */
 	public function setInfo($info, $serialized = false) {
-		if($serialized) {
+		if($unserialized) {
 			$this->info = $info;
 		} else {
 			$this->info = serialize($info);

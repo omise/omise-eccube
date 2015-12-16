@@ -45,8 +45,9 @@ class Version20151207000000 extends AbstractMigration {
 		}
 		
 		if(!$table->hasColumn('id')) $table->addColumn('id', 'integer', array('autoincrement' => true));
-		if(!$table->hasColumn('code')) $table->addColumn('code', 'text', array('notnull' => false));
-		if(!$table->hasColumn('info')) $table->addColumn('info', 'text', array('notnull' => false));
+		if(!$table->hasColumn('code')) $table->addColumn('code', 'text', array('notnull' => true));
+        if(!$table->hasColumn('payment_id')) $table->addColumn('payment_id', 'integer', array('notnull' => false));
+		if(!$table->hasColumn('info')) $table->addColumn('info', 'text', array('notnull' => true));
 		if(!$table->hasColumn('delete_flg'))$table->addColumn('delete_flg', 'smallint', array('notnull' => true, 'default' => 0));
 		if(!$table->hasColumn('create_date'))$table->addColumn('create_date', 'datetime', array('notnull' => true));
 		if(!$table->hasColumn('update_date'))$table->addColumn('update_date', 'datetime', array('notnull' => true));
@@ -60,8 +61,8 @@ class Version20151207000000 extends AbstractMigration {
         $code = 'OmisePaymentGateway';
         $createDate = date('Y-m-d H:i:s');
         
-        $insert = "INSERT INTO $tableName (code, info, create_date, update_date)"
-        		." VALUES ('$code', '', '$createDate', '$createDate');";
+        $insert = "INSERT INTO $tableName (code, payment_id, info, create_date, update_date)"
+        		." VALUES ('$code', NULL, '', '$createDate', '$createDate');";
         $this->connection->executeUpdate($insert);
 	}
 }
