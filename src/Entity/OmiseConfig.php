@@ -60,7 +60,7 @@ class OmiseConfig {
 	 * @return \Plugin\OmisePayment\Entity\OmiseConfig
 	 */
 	public function setInfo($info, $serialized = false) {
-		if($unserialized) {
+		if($serialized) {
 			$this->info = $info;
 		} else {
 			$this->info = serialize($info);

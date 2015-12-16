@@ -24,7 +24,6 @@ class ConfigController {
 			$form->handleRequest($this->app['request']);
 			
             if ($form->isValid()) {
-            	die;
                 $formData = $form->getData();
 
                 $omiseConfig->setInfo($formData);
