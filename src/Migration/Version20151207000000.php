@@ -56,8 +56,8 @@ class Version20151207000000 extends AbstractMigration {
 	
 	private function insertOmiseConfig() {
 		$tableName = 'plg_omise_config';
-        $columnOmiseKeys = 'omise_keys';
-        $columnPaymentID = 'payment_id';
+        $columnOmiseKeys = 'omise_config';
+        $columnPaymentID = 'payment_config';
         $createDate = date('Y-m-d H:i:s');
         
         $select = "SELECT count(id) FROM $tableName WHERE name = '$columnOmiseKeys';";

@@ -13,7 +13,7 @@ class PluginManager extends AbstractPluginManager {
 		
 		// 支払い方法の追加
 		$payment = $this->insertPayment('credit');
-		$this->updateOmiseConfig('payment_id', serialize(['credit_payment_id' => $payment->getId()]));
+		$this->updateOmiseConfig('payment_config', serialize(['credit_payment_id' => $payment->getId()]));
 	}
 	public function uninstall($config, $app) {
 		$this->app = $app;
@@ -25,7 +25,7 @@ class PluginManager extends AbstractPluginManager {
 		$this->app = $app;
 		
 		// 支払い方法の有効化
-		$omiseConfig = $this->selectOmiseConfig('payment_id');
+		$omiseConfig = $this->selectOmiseConfig('payment_config');
 		$info = unserialize($omiseConfig['info']);
 		$this->updatePayment($info['credit_payment_id'], 0);
 	}
@@ -33,7 +33,7 @@ class PluginManager extends AbstractPluginManager {
 		$this->app = $app;
 
 		// 支払い方法の無効化
-		$omiseConfig = $this->selectOmiseConfig('payment_id');
+		$omiseConfig = $this->selectOmiseConfig('payment_config');
 		$info = unserialize($omiseConfig['info']);
 		$this->updatePayment($info['credit_payment_id'], 1);
 	}
