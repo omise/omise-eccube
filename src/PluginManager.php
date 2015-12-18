@@ -2,7 +2,6 @@
 namespace Plugin\OmisePaymentGateway;
 
 use Eccube\Plugin\AbstractPluginManager;
-use Plugin\OmisePaymentGateway\Form\Type\ConfigType;
 class PluginManager extends AbstractPluginManager {
 	private $app;
 	
