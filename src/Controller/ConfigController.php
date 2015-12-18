@@ -15,7 +15,7 @@ class ConfigController {
         $configYml = $configService->getPluginConfig();
         
         $omiseConfig = $this->app['eccube.plugin.omise.repository.omise_pg_config']
-            ->findOneBy(array('code' => $configYml['code']));
+            ->findOneBy(array('name' => 'omise_keys'));
         
         $type = new ConfigType($this->app, (array)$omiseConfig->getInfo());
         $form = $this->app['form.factory']->createBuilder($type)->getForm();

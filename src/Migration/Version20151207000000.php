@@ -45,8 +45,7 @@ class Version20151207000000 extends AbstractMigration {
 		}
 		
 		if(!$table->hasColumn('id')) $table->addColumn('id', 'integer', array('autoincrement' => true));
-		if(!$table->hasColumn('code')) $table->addColumn('code', 'text', array('notnull' => true));
-        if(!$table->hasColumn('payment_id')) $table->addColumn('payment_id', 'integer', array('notnull' => false));
+		if(!$table->hasColumn('name')) $table->addColumn('name', 'text', array('notnull' => true));
 		if(!$table->hasColumn('info')) $table->addColumn('info', 'text', array('notnull' => true));
 		if(!$table->hasColumn('delete_flg'))$table->addColumn('delete_flg', 'smallint', array('notnull' => true, 'default' => 0));
 		if(!$table->hasColumn('create_date'))$table->addColumn('create_date', 'datetime', array('notnull' => true));
@@ -57,12 +56,22 @@ class Version20151207000000 extends AbstractMigration {
 	
 	private function insertOmiseConfig() {
 		$tableName = 'plg_omise_config';
-		
-        $code = 'OmisePaymentGateway';
+        $columnOmiseKeys = 'omise_keys';
+        $columnPaymentID = 'payment_id';
         $createDate = date('Y-m-d H:i:s');
         
-        $insert = "INSERT INTO $tableName (code, payment_id, info, create_date, update_date)"
-        		." VALUES ('$code', NULL, '', '$createDate', '$createDate');";
-        $this->connection->executeUpdate($insert);
+        $select = "SELECT count(id) FROM $tableName WHERE name = '$columnOmiseKeys';";
+        if($this->connection->executeQuery($select)->fetchColumn(0) == 0) {
+	        $insert = "INSERT INTO $tableName (name, info, create_date, update_date)"
+	        		." VALUES ('$columnOmiseKeys', '', '$createDate', '$createDate');";
+	        $this->connection->executeUpdate($insert);
+        }        
+        
+        $select = "SELECT count(id) FROM $tableName WHERE name = '$columnPaymentID';";
+        if($this->connection->executeQuery($select)->fetchColumn(0) == 0) {
+	        $insert = "INSERT INTO $tableName (name, info, create_date, update_date)"
+	        ." VALUES ('$columnPaymentID', '', '$createDate', '$createDate');";
+	        $this->connection->executeUpdate($insert);
+        }
 	}
 }

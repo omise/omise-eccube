@@ -3,8 +3,7 @@ namespace Plugin\OmisePaymentGateway\Entity;
 
 class OmiseConfig {
 	private $id;
-    private $code;
-    private $payment_id;
+    private $name;
 	private $info;
 	private $delete_flg;
 	private $create_date;
@@ -30,33 +29,16 @@ class OmiseConfig {
 	/**
 	 * @return string
 	 */
-	public function getCode() {
-		return $this->code;
+	public function getName() {
+		return $this->name;
 	}
 	/**
 	 * 
-	 * @param string $code
+	 * @param string $name
 	 * @return \Plugin\OmisePayment\Entity\OmiseConfig
 	 */
-	public function setCode($code) {
-		$this->code = $code;
-		return $this;
-	}
-	
-	/**
-	 * @return integer
-	 */
-	public function setPaymentId() {
-		$this->payment_id;
-	}
-	
-	/**
-	 * @param integer $payment_id
-	 * @return \Plugin\OmisePayment\Entity\OmiseConfig
-	 */
-	public function setPaymentId($payment_id) {
-		$this->payment_id = $payment_id;
-		
+	public function setName($name) {
+		$this->name = $name;
 		return $this;
 	}
 	

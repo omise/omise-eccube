@@ -5,6 +5,7 @@ use Eccube\Application;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Plugin\OmisePaymentGateway\Form\Type\ConfigType;
 
 class ConfigType extends AbstractType {
 	private $app;
