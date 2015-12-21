@@ -1,0 +1,45 @@
+<div class="box">
+	<div class="box-header">
+		<h3 class="box-title">アカウントの設定</h3>
+	</div>
+	<div class="box-body">
+		<div class="form-group">
+		<label class="col-sm-3 control-label required">名義　<span class="label label-danger">必須</span></label>
+		<div class="row">
+			<div class="col-sm-8">
+				{{ form_widget(form.pkey, { 'attr': {'placeholder': 'ICHIRO SUZUKI', 'class': 'form-control'} }) }}
+				{{ form_errors(form.pkey) }}
+			</div>
+		</div>
+	</div>
+	<div class="box-body">
+		<div class="form-group">
+		<label class="col-sm-3 control-label required">クレジットカード番号　<span class="label label-danger">必須</span></label>
+		<div class="row">
+			<div class="col-sm-8">
+				{{ form_widget(form.pkey, { 'attr': {'placeholder': '4242424242424242', 'class': 'form-control'} }) }}
+				{{ form_errors(form.pkey) }}
+			</div>
+		</div>
+	</div>
+	<div class="box-body">
+		<div class="form-group">
+		<label class="col-sm-3 control-label required">セキュリティコード　<span class="label label-danger">必須</span></label>
+		<div class="row">
+			<div class="col-sm-8">
+				{{ form_widget(form.pkey, { 'attr': {'placeholder': '123', 'class': 'form-control'} }) }}
+				{{ form_errors(form.pkey) }}
+			</div>
+		</div>
+	</div>
+	<div class="box-body">
+		<div class="form-group">
+		<label class="col-sm-3 control-label required">Public key　<span class="label label-danger">必須</span></label>
+		<div class="row">
+			<div class="col-sm-8">
+				{{ form_widget(form.pkey, { 'attr': {'placeholder': 'pkey_xxxxxxxxxxxxxxxxxxx', 'class': 'form-control'} }) }}
+				{{ form_errors(form.pkey) }}
+			</div>
+		</div>
+	</div>
+</div>
