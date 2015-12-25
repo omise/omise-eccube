@@ -14,7 +14,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      */
     public function init() {
         parent::init();
-        $this->tpl_mainpage = PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/config.tpl';
+        $this->tpl_mainpage = PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/admin/config.tpl';
         $this->tpl_subtitle = 'Omise Payment Gateway 設定画面';
     }
 
