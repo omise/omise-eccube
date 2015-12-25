@@ -99,6 +99,6 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      */
     public static function updateOmiseConfigInfo($info) {
     	$objQuery = &SC_Query_Ex::getSingletonInstance();
-    	return $objQuery->update('plg_OmisePaymentGateway_config', array('info' => serialize($info)), "name = 'omise_config'");
+    	return $objQuery->update('plg_OmisePaymentGateway_config', array('info' => serialize($info), 'update_date' => 'CURRENT_TIMESTAMP'), "name = 'omise_config'");
     }
 }

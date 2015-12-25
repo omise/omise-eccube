@@ -19,12 +19,16 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	/**
 	 * @param array $arrPlugin
 	 */
-	public function enable($arrPlugin) { }
+	public function enable($arrPlugin) {
+		self::updateCreditPayment(0);
+	}
 
 	/**
 	 * @param array $arrPlugin
 	 */
-	public function disable($arrPlugin) { }
+	public function disable($arrPlugin) {
+		self::updateCreditPayment(1);
+	}
 	
 	private static function createOmiseConfigTable() {
 		self::create(self::TBL_NAME_OMISE_CONFIG, [
@@ -59,6 +63,9 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	private static function insertCreditPayment() {
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
 		$objQuery->begin();
+		$rank = $objQuery->select("MAX(rank) AS 'max_rank'", 'dtb_payment');
+		$rank = $rank[0]['max_rank'] + 1;
+		
 		$params = [
 				'payment_id' => $objQuery->nextVal('dtb_payment_payment_id'),
 				'payment_method' => 'クレジットカード決済',
@@ -69,13 +76,23 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				'create_date' => 'CURRENT_TIMESTAMP',
 				'update_date' => 'CURRENT_TIMESTAMP',
 				'charge_flg' => 1,
-				'rule_min' => 1
+				'rule_max' => 100,
+				'rank' => $rank,
+				'fix' => 2
 			];
 		$objQuery->insert('dtb_payment', $params);
 		
 		$objQuery->commit();
 		
 		return $params['payment_id'];
+	}
+	
+	private static function updateCreditPayment($deleteFlg) {
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	$info = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
+    	$info = unserialize($info[0]['info']);
+    	
+    	return $objQuery->update('dtb_payment', array('del_flg' => $deleteFlg, 'update_date' => 'CURRENT_TIMESTAMP'), 'payment_id = '.$info['credit_payment_id']);
 	}
 	
 	public static function insert($tableName, $params) {
