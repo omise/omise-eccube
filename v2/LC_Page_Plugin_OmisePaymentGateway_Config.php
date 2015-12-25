@@ -45,28 +45,19 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     	$arrForm['pkey'] = '';
     	$arrForm['skey'] = '';
     
-//     	switch ($this->getMode()) {
-//     		case 'edit':
-//     			$arrForm = $objFormParam->getHashArray();
-//     			$this->arrErr = $objFormParam->checkError();
-//     			// エラーなしの場合にはデータを更新
-//     			if (count($this->arrErr) == 0) {
-//     				// データ更新
-//     				$this->arrErr = $this->updateData($arrForm, $css_file_path);
-//     				if (count($this->arrErr) == 0) {
-//     					$this->tpl_onload = "alert('登録が完了しました。');";
-//     				}
-//     			}
-//     			break;
-//     		default:
-//     			// プラグイン情報を取得.
-//     			$plugin = SC_Plugin_Util_Ex::getPluginByPluginCode("TopicPath");
-//     			$arrForm['level'] = $plugin['free_field1'];
-//     			$arrForm['rank'] = $plugin['free_field2'];
-//     			// CSSファイル.
-//     			$arrForm['css_data'] = $this->getTplMainpage($css_file_path);
-//     			break;
-//     	}
+    	switch ($this->getMode()) {
+    		case 'edit':
+    			$arrForm = $objFormParam->getHashArray();
+    			$this->arrErr = $objFormParam->checkError();
+    			// エラーなしの場合にはデータを更新
+    			if (count($this->arrErr) == 0) {
+    				// データ更新
+    			}
+    			break;
+    		default:
+    			// プラグイン情報を取得.
+    			break;
+    	}
     	$this->arrForm = $arrForm;
     	$this->setTemplate($this->tpl_mainpage);
     }
@@ -87,7 +78,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      * @return void
      */
     function initParam(&$objFormParam) {
-    	$objFormParam->addParam('Public Key', 'pley', 29, '', array('EXIST_CHECK', 'MAX_LENGTH_CHECK', 'GRAPH_CHECK'));
+    	$objFormParam->addParam('Public Key', 'pkey', 29, '', array('EXIST_CHECK', 'MAX_LENGTH_CHECK', 'GRAPH_CHECK'));
     	$objFormParam->addParam('Secret Key', 'skey', 29, '', array('EXIST_CHECK', 'MAX_LENGTH_CHECK', 'GRAPH_CHECK'));
     }
 }

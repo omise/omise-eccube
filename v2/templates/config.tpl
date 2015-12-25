@@ -6,8 +6,8 @@
 <form name="form1" id="form1" method="post" action="<!--{$smarty.server.REQUEST_URI|h}-->">
 <input type="hidden" name="<!--{$smarty.const.TRANSACTION_ID_NAME}-->" value="<!--{$transactionid}-->" />
 <input type="hidden" name="mode" value="edit">
-<p>Omiseの設定が行えます。<br/>
-    <br/>
+<p>OmiseAPIへの接続設定をしてください。<br/>
+接続キーは<a href="https://dashboard.omise.co/signin">Omise Dashboard</a>から確認できます。<br/><br/>
 </p>
 
 <table border="0" cellspacing="1" cellpadding="8" summary=" ">
@@ -19,15 +19,15 @@
         <td>
         <!--{assign var=key value="pkey"}-->
         <span class="red"><!--{$arrErr[$key]}--></span>
-        <input type="text" name="skey" value="<!--{$arrForm[$key]|h}-->" placeholder="pkey_xxxxxxxxxxxxxxxxxxx" />
+        <input type="text" name="pkey" style="width:260px" value="<!--{$arrForm[$key]}-->" placeholder="pkey_xxxxxxxxxxxxxxxxxxx" />
         </td>
     </tr>
     <tr>
         <td bgcolor="#f3f3f3">Secret Key<span class="red">※</span></td>
         <td>
         <!--{assign var=key value="skey"}-->
-        <span class="red"><!--{$arrErr[$key]}--></span><br />
-        <input type="text" name="skey" value="<!--{$arrForm[$key]|h}-->" placeholder="skey_xxxxxxxxxxxxxxxxxxx" />
+        <span class="red"><!--{$arrErr[$key]}--></span>
+        <input type="text" name="skey" style="width:260px" value="<!--{$arrForm[$key]}-->" placeholder="skey_xxxxxxxxxxxxxxxxxxx" />
         </td>
     </tr>
 </table>
@@ -35,7 +35,7 @@
 <div class="btn-area">
     <ul>
         <li>
-            <a class="btn-action" href="javascript:;" onclick="document.form1.submit();return false;"><span class="btn-next">この内容で登録する</span></a>
+            <a class="btn-action" href="javascript:;" onclick="document.form1.submit();return false;"><span class="btn-next">登録する</span></a>
         </li>
     </ul>
 </div>
