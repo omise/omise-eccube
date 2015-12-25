@@ -111,4 +111,37 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$sql = sprintf('DROP TABLE %s', $tableName);
 		$objQuery->query($sql);
 	}
+	
+	
+	
+	/* -------------------- Hook Points -------------------- */
+	/**
+	 * @param LC_Page_Shopping_Payment $objPage 
+	 * @return void
+	 */
+	public function shoppingPaymentActionAfter($objPage) {
+		echo '';
+	}
+	
+	
+	// outputfilterTransform
+	public function outputfilterTransform(&$source, LC_Page_Ex $objPage) {
+		$objTransform = new SC_Helper_Transform($source);
+		switch ($objPage->arrPageLayout['device_type_id']) {
+			case DEVICE_TYPE_MOBILE:
+			case DEVICE_TYPE_SMARTPHONE:
+			case DEVICE_TYPE_PC:
+				if(strpos($objPage->tpl_mainpage, 'shopping/payment.tpl') !== false) {
+					$objTransform->select('#payment')->insertAfter(
+					'<div>カード番号<input type="text" /></div>');
+				}
+				break;
+				
+			case DEVICE_TYPE_ADMIN:
+			default:
+				break;
+		}
+		
+		$source = $objTransform->getHTML();
+	}
 }
