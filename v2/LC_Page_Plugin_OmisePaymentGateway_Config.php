@@ -1,6 +1,5 @@
 <?php
-// {{{ requires
-require_once CLASS_EX_REALDIR . 'page_extends/admin/LC_Page_Admin_Ex.php';
+require_once CLASS_EX_REALDIR.'page_extends/admin/LC_Page_Admin_Ex.php';
 
 /**
  * 管理画面表示制御の設定クラス
@@ -13,7 +12,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      *
      * @return void
      */
-    function init() {
+    public function init() {
         parent::init();
         $this->tpl_mainpage = PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/config.tpl';
         $this->tpl_subtitle = 'Omise Payment Gateway 設定画面';
@@ -24,7 +23,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      *
      * @return void
      */
-    function process() {
+    public function process() {
     	$this->action();
     	$this->sendResponse();
     }
@@ -34,16 +33,12 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      *
      * @return void
      */
-    function action() {
+    public function action() {
     	$objFormParam = new SC_FormParam_Ex();
     	$this->initParam($objFormParam);
     	$objFormParam->setParam($_POST);
     	$objFormParam->convParam();
-    
-    	$css_file_path = PLUGIN_HTML_REALDIR . "TopicPath/media/topicPath.css";
     	$arrForm = array();
-    	$arrForm['pkey'] = '';
-    	$arrForm['skey'] = '';
     
     	switch ($this->getMode()) {
     		case 'edit':
@@ -51,11 +46,16 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     			$this->arrErr = $objFormParam->checkError();
     			// エラーなしの場合にはデータを更新
     			if (count($this->arrErr) == 0) {
-    				// データ更新
+    				if(self::updateOmiseConfigInfo($arrForm) === 1) {
+						$this->tpl_onload = "alert('登録しました。');";
+    				}
     			}
     			break;
     		default:
-    			// プラグイン情報を取得.
+    			$omiseConfig = self::selectOmiseConfigInfo();
+    			// $arrForm = $omiseConfig
+		    	$arrForm['pkey'] = $omiseConfig['pkey'];
+		    	$arrForm['skey'] = $omiseConfig['skey'];
     			break;
     	}
     	$this->arrForm = $arrForm;
@@ -67,7 +67,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      *
      * @return void
      */
-    function destroy() {
+    public function destroy() {
     	parent::destroy();
     }
     
@@ -77,8 +77,28 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      * @param object $objFormParam SC_FormParamインスタンス
      * @return void
      */
-    function initParam(&$objFormParam) {
+    public function initParam(&$objFormParam) {
     	$objFormParam->addParam('Public Key', 'pkey', 29, '', array('EXIST_CHECK', 'MAX_LENGTH_CHECK', 'GRAPH_CHECK'));
     	$objFormParam->addParam('Secret Key', 'skey', 29, '', array('EXIST_CHECK', 'MAX_LENGTH_CHECK', 'GRAPH_CHECK'));
+    }
+    
+    /**
+     * plg_OmisePaymentGateway_configテーブルからomise_configのレコードを取り出す
+     * @return array
+     */
+    public static function selectOmiseConfigInfo() {
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	$result = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'omise_config'");
+    	
+    	return unserialize($result[0]['info']);
+    }
+
+    /**
+     * plg_OmisePaymentGateway_configテーブルのomise_configのレコードを更新する
+     * @return void
+     */
+    public static function updateOmiseConfigInfo($info) {
+    	$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	return $objQuery->update('plg_OmisePaymentGateway_config', array('info' => serialize($info)), "name = 'omise_config'");
     }
 }

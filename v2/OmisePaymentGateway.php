@@ -43,14 +43,14 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		self::insert(self::TBL_NAME_OMISE_CONFIG, [
 				'id' => 1,
 				'name' => 'omise_config',
-				'info' => '',
+				'info' => serialize(array('pkey' => '', 'skey' => '')),
 				'create_date' => 'CURRENT_TIMESTAMP',
 				'update_date' => 'CURRENT_TIMESTAMP'
 			]);
 		self::insert(self::TBL_NAME_OMISE_CONFIG, [
 				'id' => 2,
 				'name' => 'payment_config',
-				'info' => serialize(['credit_payment_id' => $paymentId]),
+				'info' => serialize(array('credit_payment_id' => $paymentId)),
 				'create_date' => 'CURRENT_TIMESTAMP',
 				'update_date' => 'CURRENT_TIMESTAMP'
 			]);

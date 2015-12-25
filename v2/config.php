@@ -5,4 +5,3 @@ $objPage = new LC_Page_Plugin_OmisePaymentGateway_Config();
 register_shutdown_function(array($objPage, 'destroy'));
 $objPage->init();
 $objPage->process();
-?>
