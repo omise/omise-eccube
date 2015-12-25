@@ -36,8 +36,8 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				'name TEXT NOT NULL',
 				'info TEXT NOT NULL',
 				'delete_flg SMALLINT NOT NULL',
-				'create_date TIMESTAMP NOT NULL',
-				'update_date TIMESTAMP NOT NULL'
+				"create_date TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00'",
+				"update_date TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00'"
 			]);
 	}
 	
