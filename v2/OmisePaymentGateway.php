@@ -2,23 +2,22 @@
 class OmisePaymentGateway extends SC_Plugin_Base {
 	const TBL_NAME_OMISE_CONFIG = 'plg_OmisePaymentGateway_config';
 	/**
-	 * @param array $arrPlugin 
+	 * @param array $arrPlugin
 	 */
 	public function install($arrPlugin) {
 		self::createOmiseConfigTable();
-		//self::insertOmiseConfig();
-		self::insertCreditPayment();
+		self::insertOmiseConfig();
 	}
 
 	/**
-	 * @param array $arrPlugin 
+	 * @param array $arrPlugin
 	 */
 	public function uninstall($arrPlugin) {
 		self::drop(self::TBL_NAME_OMISE_CONFIG);
 	}
 	
 	/**
-	 * @param array $arrPlugin 
+	 * @param array $arrPlugin
 	 */
 	public function enable($arrPlugin) { }
 
@@ -36,10 +35,11 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				'create_date TIMESTAMP NOT NULL',
 				'update_date TIMESTAMP NOT NULL'
 			]);
-		
 	}
 	
 	private static function insertOmiseConfig() {
+		$paymentId = self::insertCreditPayment();
+		
 		self::insert(self::TBL_NAME_OMISE_CONFIG, [
 				'id' => 1,
 				'name' => 'omise_config',
@@ -50,7 +50,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		self::insert(self::TBL_NAME_OMISE_CONFIG, [
 				'id' => 2,
 				'name' => 'payment_config',
-				'info' => '',
+				'info' => serialize(['credit_payment_id' => $paymentId]),
 				'create_date' => 'CURRENT_TIMESTAMP',
 				'update_date' => 'CURRENT_TIMESTAMP'
 			]);
@@ -74,6 +74,8 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$objQuery->insert('dtb_payment', $params);
 		
 		$objQuery->commit();
+		
+		return $params['payment_id'];
 	}
 	
 	public static function insert($tableName, $params) {
