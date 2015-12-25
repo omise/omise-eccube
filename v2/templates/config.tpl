@@ -7,7 +7,7 @@
 <input type="hidden" name="<!--{$smarty.const.TRANSACTION_ID_NAME}-->" value="<!--{$transactionid}-->" />
 <input type="hidden" name="mode" value="edit">
 <p>OmiseAPIへの接続設定をしてください。<br/>
-接続キーは<a href="https://dashboard.omise.co/signin">Omise Dashboard</a>から確認できます。<br/><br/>
+接続キーは<a target="_blank" href="https://dashboard.omise.co/signin">Omise Dashboard</a>から確認できます。<br/><br/>
 </p>
 
 <table border="0" cellspacing="1" cellpadding="8" summary=" ">
