@@ -2,15 +2,15 @@
 	<table>
 		<tbody>
 			<tr>
-				<td bgcolor="#f3f3f3">カード番号<span class="red">※</span></td>
+				<td bgcolor="#f3f3f3">カード番号<span style="color:red;">※</span></td>
 				<td><input type="text" name="omise_credit_number" style="width:300px"><br/>例）0123456789012345<br/>ハイフンは入力しないでください。</td>
 			</tr>
 			<tr>
-				<td bgcolor="#f3f3f3">氏名<span class="red">※</span></td>
+				<td bgcolor="#f3f3f3">氏名<span style="color:red;">※</span></td>
 				<td><input type="text" name="omise_name" style="width:300px"><br/>例）TARO SUZUKI</td>
 			</tr>
 			<tr>
-				<td bgcolor="#f3f3f3">有効期限<span class="red">※</span></td>
+				<td bgcolor="#f3f3f3">有効期限<span style="color:red;">※</span></td>
 				<td>
 					<select name="omise_expiration_year">
 						<?php 
@@ -39,7 +39,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td bgcolor="#f3f3f3">セキュリティコード<span class="red">※</span></td>
+				<td bgcolor="#f3f3f3">セキュリティコード<span style="color:red;">※</span></td>
 				<td><input type="text" name="omise_security_code" style="width:60px"><br/>例）456<br/>セキュリティコードとは、カード裏面に印刷されている3桁から4桁の数字のことです。</td>
 			</tr>
 		</tbody>
