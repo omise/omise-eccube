@@ -13,6 +13,8 @@ class plugin_info {
     static $LICENSE             = 'MITL';
     static $HOOK_POINTS       = array(
     		array('LC_Page_Shopping_Payment_action_after', 'shoppingPaymentActionAfter'),
+    		array('LC_Page_Shopping_Confirm_action_after', 'shoppingConfirmActionAfter'),
+    		array('LC_Page_Shopping_Payment_action_confirm', 'shoppingPaymentActionConfirm'),
     		array('prefilterTransform', 'prefilterTransform')
     );
 }

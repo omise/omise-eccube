@@ -100,11 +100,6 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$objQuery->insert($tableName, $params);
 	}
 	
-	public static function select($colmn, $tableName, $where) {
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-    	return $objQuery->select($colmn, $tableName, $where);
-	}
-	
 	public static function create($tableName, $fields) {
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
 		$sql = sprintf('CREATE TABLE %s (%s)', $tableName, implode(',', $fields));
@@ -117,18 +112,51 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$objQuery->query($sql);
 	}
 	
+	public static function selectPaymentConfig() {
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+		$info = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
+		return unserialize($info[0]['info']);
+	}
+	
 	
 	
 	/* -------------------- Hook Points -------------------- */
 	/**
 	 * @param LC_Page_Shopping_Payment $objPage 
+	 * 支払い方法選択画面
 	 * @return void
 	 */
 	public function shoppingPaymentActionAfter($objPage) {
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-    	$info = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
-    	$info = unserialize($info[0]['info']);
+    	$info = self::selectPaymentConfig();
 		$objPage->arrForm['plg_OmisePaymentGateway_payment_id'] = $info['credit_payment_id'];
+	}
+
+	/**
+	 * @param LC_Page_Shopping_Payment $objPage
+	 * 支払い方法確認画面
+	 * @return void
+	 */
+	public function shoppingPaymentActionConfirm($objPage) {
+    	$info = self::selectPaymentConfig();
+    	if($_POST['payment_id'] == $info['credit_payment_id']) {
+    		$number = $_POST['omise_credit_number'];
+    		$name = $_POST['omise_name'];
+    		$expirationYear = $_POST['omise_expiration_year'];
+    		$expirationMonth = $_POST['omise_expiration_month'];
+    		$securityCode = $_POST['omise_security_code'];
+    		
+    		// これまでのオーダ情報はセッションではなくtemp_orderテーブルに格納されているので要注意。
+    		// TODO 年明けここから。Omise-API叩く。
+    	}
+	}
+	
+	/**
+	 * @param LC_Page_Shopping_Confirm $objPage
+	 * 支払い方法確認画面
+	 * @return void
+	 */
+	public function shoppingConfirmActionAfter($objPage) {
+		
 	}
 	
 	// prefilterTransform
