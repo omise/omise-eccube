@@ -1,4 +1,4 @@
-<div id="plg_omisepaymentgateway_credit" style="display:none;">
+<div id="plg_omisepaymentgateway_credit">
 	<table>
 		<tbody>
 			<tr>
@@ -46,16 +46,26 @@
 	</table>
 </div>
 <script type="text/javascript">
-var rdo_payments = document.getElementsByName('payment_id');
-var rdo_pay_len = rdo_payments.length;
+$(function() {
+	var rdo_payments = document.getElementsByName('payment_id');
+	var rdo_pay_len = rdo_payments.length;
+	
+	for(i = 0; i < rdo_pay_len; ++i) {
+		rdo_payments[i].onchange = function() {
+			if(this.value == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}--> && this.checked) {
+				document.getElementById('plg_omisepaymentgateway_credit').style.display = "block";
+			} else {
+				document.getElementById('plg_omisepaymentgateway_credit').style.display = "none";
+			}
+		};
 
-for(i = 0; i < rdo_pay_len; ++i) {
-	rdo_payments[i].onchange = function() {
-		if(this.checked && this.value == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}-->) {
-			document.getElementById('plg_omisepaymentgateway_credit').style.display = "block";
-		} else {
-			document.getElementById('plg_omisepaymentgateway_credit').style.display = "none";
+		if(rdo_payments[i].value == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}-->) {
+			if(rdo_payments[i].checked) {
+				document.getElementById('plg_omisepaymentgateway_credit').style.display = "block";
+			} else {
+				document.getElementById('plg_omisepaymentgateway_credit').style.display = "none";
+			}
 		}
-	};
-}
+	}
+});
 </script>
