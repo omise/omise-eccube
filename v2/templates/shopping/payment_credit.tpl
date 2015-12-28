@@ -22,7 +22,7 @@
 						}
 						?>
 					</select>年
-					<select name="omise_expiration_montd" style="margin-left:10px;">
+					<select name="omise_expiration_month" style="margin-left:10px;">
 						<option value="01">01</option>
 						<option value="02">02</option>
 						<option value="03">03</option>
