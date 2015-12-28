@@ -17,17 +17,15 @@
     <tr >
         <td bgcolor="#f3f3f3">Public Key<span class="red">※</span></td>
         <td>
-        <!--{assign var=key value="pkey"}-->
-        <span class="red"><!--{$arrErr[$key]}--></span>
-        <input type="text" name="pkey" style="width:260px" value="<!--{$arrForm[$key]}-->" placeholder="pkey_xxxxxxxxxxxxxxxxxxx" />
+        <span class="red"><!--{$arrErr.pkey}--></span>
+        <input type="text" name="pkey" style="width:260px" value="<!--{$arrForm.pkey}-->" placeholder="pkey_xxxxxxxxxxxxxxxxxxx" />
         </td>
     </tr>
     <tr>
         <td bgcolor="#f3f3f3">Secret Key<span class="red">※</span></td>
         <td>
-        <!--{assign var=key value="skey"}-->
-        <span class="red"><!--{$arrErr[$key]}--></span>
-        <input type="text" name="skey" style="width:260px" value="<!--{$arrForm[$key]}-->" placeholder="skey_xxxxxxxxxxxxxxxxxxx" />
+        <span class="red"><!--{$arrErr.skey}--></span>
+        <input type="text" name="skey" style="width:260px" value="<!--{$arrForm.skey}-->" placeholder="skey_xxxxxxxxxxxxxxxxxxx" />
         </td>
     </tr>
 </table>

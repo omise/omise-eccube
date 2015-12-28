@@ -100,6 +100,11 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$objQuery->insert($tableName, $params);
 	}
 	
+	public static function select($colmn, $tableName, $where) {
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	return $objQuery->select($colmn, $tableName, $where);
+	}
+	
 	public static function create($tableName, $fields) {
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
 		$sql = sprintf('CREATE TABLE %s (%s)', $tableName, implode(',', $fields));
@@ -120,28 +125,40 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 * @return void
 	 */
 	public function shoppingPaymentActionAfter($objPage) {
-		echo '';
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	$info = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
+    	$info = unserialize($info[0]['info']);
+		$objPage->arrForm['plg_OmisePaymentGateway_payment_id'] = $info['credit_payment_id'];
 	}
 	
-	
-	// outputfilterTransform
-	public function outputfilterTransform(&$source, LC_Page_Ex $objPage) {
+	// prefilterTransform
+	public function prefilterTransform(&$source, LC_Page_Ex $objPage, $filename) {
 		$objTransform = new SC_Helper_Transform($source);
 		switch ($objPage->arrPageLayout['device_type_id']) {
 			case DEVICE_TYPE_MOBILE:
 			case DEVICE_TYPE_SMARTPHONE:
 			case DEVICE_TYPE_PC:
-				if(strpos($objPage->tpl_mainpage, 'shopping/payment.tpl') !== false) {
-					$objTransform->select('#payment')->insertAfter(
-					'<div>カード番号<input type="text" /></div>');
+				if(strpos($filename, 'shopping/payment.tpl') !== false) {
+					$objTransform->select('#payment')->insertAfter($this->includeTpl(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/payment_credit.tpl'));
 				}
 				break;
-				
+	
 			case DEVICE_TYPE_ADMIN:
 			default:
 				break;
 		}
-		
+	
 		$source = $objTransform->getHTML();
+	}
+	
+	private function includeTpl($fileName) {
+		$str = '';
+		
+		ob_start();
+		include $fileName;
+		$str = ob_get_contents();
+		ob_end_clean();
+		
+		return $str;
 	}
 }
