@@ -1,4 +1,4 @@
-<div id="omise_credit_box" style="display:none;">
+<div id="plg_omisepaymentgateway_credit" style="display:none;">
 	<table>
 		<tbody>
 			<tr>
@@ -50,10 +50,12 @@ var rdo_payments = document.getElementsByName('payment_id');
 var rdo_pay_len = rdo_payments.length;
 
 for(i = 0; i < rdo_pay_len; ++i) {
-	if(rdo_payments[i].value == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}-->) {
-		rdo_payments[i].onchange = function() {
-				console.log(rdo_payments[i].checked);
-			};
-	}
+	rdo_payments[i].onchange = function() {
+		if(this.checked && this.value == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}-->) {
+			document.getElementById('plg_omisepaymentgateway_credit').style.display = "block";
+		} else {
+			document.getElementById('plg_omisepaymentgateway_credit').style.display = "none";
+		}
+	};
 }
 </script>
