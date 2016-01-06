@@ -1,68 +1,30 @@
 <?php
+require_once PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/omise-php/lib/Omise.php';
 class OmisePaymentGateway extends SC_Plugin_Base {
-	const TBL_NAME_OMISE_CONFIG = 'plg_OmisePaymentGateway_config';
+	const TBL_OMISE_CONFIG = 'plg_OmisePaymentGateway_config';
+	const CONFIG_PAYMENT = 'payment_config';
+	const CONFIG_OIMISE = 'omise_config';
+	
 	/**
 	 * @param array $arrPlugin
 	 */
 	public function install($arrPlugin) {
-		self::createOmiseConfigTable();
-		self::insertOmiseConfig();
-	}
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+		$objQuery->begin();
 
-	/**
-	 * @param array $arrPlugin
-	 */
-	public function uninstall($arrPlugin) {
-		self::drop(self::TBL_NAME_OMISE_CONFIG);
-	}
-	
-	/**
-	 * @param array $arrPlugin
-	 */
-	public function enable($arrPlugin) {
-		self::updateCreditPayment(0);
-	}
-
-	/**
-	 * @param array $arrPlugin
-	 */
-	public function disable($arrPlugin) {
-		self::updateCreditPayment(1);
-	}
-	
-	private static function createOmiseConfigTable() {
-		self::create(self::TBL_NAME_OMISE_CONFIG, [
+		// OmiseConfigテーブルの作成
+		$fields = [
 				'id INT NOT NULL PRIMARY KEY',
 				'name TEXT NOT NULL',
 				'info TEXT NOT NULL',
 				'delete_flg SMALLINT NOT NULL',
 				"create_date TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00'",
 				"update_date TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00'"
-			]);
-	}
-	
-	private static function insertOmiseConfig() {
-		$paymentId = self::insertCreditPayment();
+			];
+		$sql = sprintf('CREATE TABLE %s (%s)', self::TBL_OMISE_CONFIG, implode(',', $fields));
+		$objQuery->query($sql);
 		
-		self::insert(self::TBL_NAME_OMISE_CONFIG, [
-				'id' => 1,
-				'name' => 'omise_config',
-				'info' => serialize(array('pkey' => '', 'skey' => '')),
-				'create_date' => 'CURRENT_TIMESTAMP',
-				'update_date' => 'CURRENT_TIMESTAMP'
-			]);
-		self::insert(self::TBL_NAME_OMISE_CONFIG, [
-				'id' => 2,
-				'name' => 'payment_config',
-				'info' => serialize(array('credit_payment_id' => $paymentId)),
-				'create_date' => 'CURRENT_TIMESTAMP',
-				'update_date' => 'CURRENT_TIMESTAMP'
-			]);
-	}
-	
-	private static function insertCreditPayment() {
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$objQuery->begin();
+		// クレカ決済の作成
 		$rank = $objQuery->select("MAX(rank) AS 'max_rank'", 'dtb_payment');
 		$rank = $rank[0]['max_rank'] + 1;
 		
@@ -79,46 +41,66 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				'rule_max' => 100,
 				'rank' => $rank,
 				'fix' => 2
-			];
+		];
 		$objQuery->insert('dtb_payment', $params);
 		
-		$objQuery->commit();
+		// Omise初期設定の書き込み
+		$objQuery->insert(self::TBL_OMISE_CONFIG, [
+				'id' => 1,
+				'name' => self::CONFIG_OIMISE,
+				'info' => serialize(array('pkey' => '', 'skey' => '')),
+				'create_date' => 'CURRENT_TIMESTAMP',
+				'update_date' => 'CURRENT_TIMESTAMP'
+		]);
+		$objQuery->insert(self::TBL_OMISE_CONFIG, [
+				'id' => 2,
+				'name' => self::CONFIG_PAYMENT,
+				'info' => serialize(array('credit_payment_id' => $params['payment_id'])),
+				'create_date' => 'CURRENT_TIMESTAMP',
+				'update_date' => 'CURRENT_TIMESTAMP'
+		]);
 		
-		return $params['payment_id'];
+		$objQuery->commit();
+	}
+
+	/**
+	 * @param array $arrPlugin
+	 */
+	public function uninstall($arrPlugin) {
+		// OmiseConfigテーブルの削除
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+		$objQuery->query('DROP TABLE '.self::TBL_OMISE_CONFIG);
 	}
 	
-	private static function updateCreditPayment($deleteFlg) {
+	/**
+	 * @param array $arrPlugin
+	 */
+	public function enable($arrPlugin) {
+		// クレジット決済の有効化
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
-    	$info = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
+    	$info = $objQuery->select('info', self::TBL_OMISE_CONFIG, "name = '".self::CONFIG_PAYMENT."'");
     	$info = unserialize($info[0]['info']);
     	
-    	return $objQuery->update('dtb_payment', array('del_flg' => $deleteFlg, 'update_date' => 'CURRENT_TIMESTAMP'), 'payment_id = '.$info['credit_payment_id']);
+    	$objQuery->update('dtb_payment', array('del_flg' => 0, 'update_date' => 'CURRENT_TIMESTAMP'), 'payment_id = '.$info['credit_payment_id']);
+	}
+
+	/**
+	 * @param array $arrPlugin
+	 */
+	public function disable($arrPlugin) {
+		// クレカ決済の無効化
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	$info = $objQuery->select('info', self::TBL_OMISE_CONFIG, "name = '".self::CONFIG_PAYMENT."'");
+    	$info = unserialize($info[0]['info']);
+    	
+    	$objQuery->update('dtb_payment', array('del_flg' => 1, 'update_date' => 'CURRENT_TIMESTAMP'), 'payment_id = '.$info['credit_payment_id']);
 	}
 	
-	public static function insert($tableName, $params) {
+	private static function selectConfig($configName) {
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$objQuery->insert($tableName, $params);
-	}
-	
-	public static function create($tableName, $fields) {
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$sql = sprintf('CREATE TABLE %s (%s)', $tableName, implode(',', $fields));
-		$objQuery->query($sql);
-	}
-	
-	public static function drop($tableName) {
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$sql = sprintf('DROP TABLE %s', $tableName);
-		$objQuery->query($sql);
-	}
-	
-	public static function selectPaymentConfig() {
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$info = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
+		$info = $objQuery->select('info', self::TBL_OMISE_CONFIG, "name = '$configName'");
 		return unserialize($info[0]['info']);
 	}
-	
-	
 	
 	/* -------------------- Hook Points -------------------- */
 	/**
@@ -127,7 +109,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 * @return void
 	 */
 	public function shoppingPaymentActionAfter($objPage) {
-    	$info = self::selectPaymentConfig();
+    	$info = self::selectConfig(self::CONFIG_PAYMENT);
 		$objPage->arrForm['plg_OmisePaymentGateway_payment_id'] = $info['credit_payment_id'];
 	}
 
@@ -137,16 +119,29 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 * @return void
 	 */
 	public function shoppingPaymentActionConfirm($objPage) {
-    	$info = self::selectPaymentConfig();
-    	if($_POST['payment_id'] == $info['credit_payment_id']) {
+    	$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
+    	if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
     		$number = $_POST['omise_credit_number'];
     		$name = $_POST['omise_name'];
     		$expirationYear = $_POST['omise_expiration_year'];
     		$expirationMonth = $_POST['omise_expiration_month'];
     		$securityCode = $_POST['omise_security_code'];
     		
+    		$configInfo = self::selectConfig(self::CONFIG_OIMISE);
+    		$configInfo['pkey'];
+    		$configInfo['skey'];
+    		
     		// これまでのオーダ情報はセッションではなくtemp_orderテーブルに格納されているので要注意。
     		// TODO 年明けここから。Omise-API叩く。
+//     		$objFormParam = new SC_FormParam_Ex();
+//     		$objFormParam->setParam($_POST);
+//     		$objFormParam->addParam('カード番号', 'omise_credit_number', '', '', array('EXIST_CHECK','NO_SPTAB'));
+//     		$objFormParam->addParam('氏名', 'omise_name', '', '', array('EXIST_CHECK','NO_SPTAB'));
+    		
+//     		$objPage->arrError = $objFormParam->checkError();
+
+//     		SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+//     		//SC_Response_Ex::actionExit();
     	}
 	}
 	
@@ -157,6 +152,25 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 */
 	public function shoppingConfirmActionAfter($objPage) {
 		
+	}
+	
+	//SC_FormParam
+	public function addParam($class_name, $param) {
+		if(strpos($class_name, 'LC_Page_Shopping') !== false) {
+			if(array_key_exists('payment_id', $_POST)) {
+	    		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
+				if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
+					$param->addParam('カード番号1', 'omise_credit_number1', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード番号2', 'omise_credit_number2', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード番号3', 'omise_credit_number3', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード番号4', 'omise_credit_number4', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード名義人', 'omise_name', STEXT_LEN, '', array('EXIST_CHECK','ALPHA_CHECK', 'MAX_LENGTH_CHECK'));
+					$param->addParam('有効期限（年）', 'omise_expiration_year', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('有効期限（月）', 'omise_expiration_month', 2, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('セキュリティコード', 'omise_security_code', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'MAX_LENGTH_CHECK'));
+				}
+			}
+		}
 	}
 	
 	// prefilterTransform
