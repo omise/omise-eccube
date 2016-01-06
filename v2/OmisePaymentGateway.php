@@ -111,8 +111,11 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	public function shoppingPaymentActionAfter($objPage) {
     	$info = self::selectConfig(self::CONFIG_PAYMENT);
 		$objPage->arrForm['plg_OmisePaymentGateway_payment_id'] = $info['credit_payment_id'];
+    	$info = self::selectConfig(self::CONFIG_OIMISE);
+		$objPage->arrForm['plg_OmisePaymentGateway_pkey'] = $info['pkey'];
 		$objPage->arrForm['plg_OmisePaymentGateway_expiration_years'] = array();
 		$objPage->arrForm['plg_OmisePaymentGateway_expiration_months'] = array();
+		
 		
 		$y = date('Y');
 		$ey = $y + 10;

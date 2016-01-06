@@ -1,5 +1,6 @@
 <?php
 require_once CLASS_EX_REALDIR.'page_extends/admin/LC_Page_Admin_Ex.php';
+require_once PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/omise-php/lib/Omise.php';
 
 /**
  * 管理画面表示制御の設定クラス
@@ -44,12 +45,33 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     		case 'edit':
     			$arrForm = $objFormParam->getHashArray();
     			$this->arrErr = $objFormParam->checkError();
-    			// エラーなしの場合にはデータを更新
+    			// エラーなしの場合にはAPIから確認
     			if (count($this->arrErr) == 0) {
-    				if(self::updateOmiseConfigInfo($arrForm) === 1) {
-						$this->tpl_onload = "alert('登録しました。');";
+    				try {
+	    				// 正しいキーか確認
+	    				define('OMISE_PUBLIC_KEY', $arrForm['pkey']);
+	    				define('OMISE_SECRET_KEY', $arrForm['skey']);
+	    				$omise = OmiseAccount::retrieve();
+	    				$omise = OmiseToken::create(array(
+	    						'card' => array(
+	    								'name' => 'Somchai Prasert',
+	    								'number' => '4242424242424242',
+	    								'expiration_month' => 10,
+	    								'expiration_year' => 2018,
+	    								'city' => 'Bangkok',
+	    								'postal_code' => '10320',
+	    								'security_code' => 123
+	    						)
+	    				));
+	    				
+	    				if(self::updateOmiseConfigInfo($arrForm) === 1) {
+							$this->tpl_onload = "alert('登録しました。');";
+	    				}
+    				} catch (OmiseException $e) {
+    					$this->tpl_onload = "alert('キーが間違っているため登録できません。');";
     				}
-    			}
+	    		}
+    			
     			break;
     		default:
     			$omiseConfig = self::selectOmiseConfigInfo();
