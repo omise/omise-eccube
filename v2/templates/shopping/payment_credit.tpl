@@ -1,66 +1,30 @@
 <div id="plg_omisepaymentgateway_credit">
-	<!--{assign var=key value="plg_OmisePaymentGateway_credit_number1"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_credit_number2"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_credit_number3"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_credit_number4"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_name"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_expiration_year"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_expiration_month"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_security_code"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
-	<!--{assign var=key value="plg_OmisePaymentGateway_test_error"}-->
-	<!--{if $arrErr[$key] != ""}-->
-	<p class="attention"><!--{$arrErr[$key]}--></p>
-	<!--{/if}-->
 	<table>
 		<tbody>
 			<tr>
 				<td bgcolor="#f3f3f3">カード番号<span style="color:red;">※</span></td>
-				<td><input type="text" name="plg_OmisePaymentGateway_credit_number1" style="width:60px" value="<!--{$arrForm.plg_OmisePaymentGateway_credit_number1.value}-->"> - <!-- 
-				 --><input type="text" name="plg_OmisePaymentGateway_credit_number2" style="width:60px" value="<!--{$arrForm.plg_OmisePaymentGateway_credit_number2.value}-->"> - <!-- 
-				 --><input type="text" name="plg_OmisePaymentGateway_credit_number3" style="width:60px" value="<!--{$arrForm.plg_OmisePaymentGateway_credit_number3.value}-->"> - <!-- 
-				 --><input type="text" name="plg_OmisePaymentGateway_credit_number4" style="width:60px" value="<!--{$arrForm.plg_OmisePaymentGateway_credit_number4.value}-->">
+				<td><input type="text" name="plg_OmisePaymentGateway_credit_number1" style="width:60px"> - <!-- 
+				 --><input type="text" name="plg_OmisePaymentGateway_credit_number2" style="width:60px"> - <!-- 
+				 --><input type="text" name="plg_OmisePaymentGateway_credit_number3" style="width:60px"> - <!-- 
+				 --><input type="text" name="plg_OmisePaymentGateway_credit_number4" style="width:60px">
 				
 				<br/>例）0123-4567-8901-2345</td>
 			</tr>
 			<tr>
 				<td bgcolor="#f3f3f3">カード名義人<span style="color:red;">※</span></td>
-				<td><input type="text" name="plg_OmisePaymentGateway_name" style="width:300px" value="<!--{$arrForm.plg_OmisePaymentGateway_name.value}-->"><br/>例）TARO SUZUKI</td>
+				<td><input type="text" name="plg_OmisePaymentGateway_name" style="width:300px"><br/>例）TARO SUZUKI</td>
 			</tr>
 			<tr>
 				<td bgcolor="#f3f3f3">有効期限<span style="color:red;">※</span></td>
 				<td>
 					<select name="plg_OmisePaymentGateway_expiration_year">
 						<!--{foreach from=$arrForm.plg_OmisePaymentGateway_expiration_years item=value}-->
-							<option value="<!--{$value}-->" <!--{if $arrForm.plg_OmisePaymentGateway_expiration_year.value == $value}-->selected="selected"<!--{/if}-->><!--{$value}--></option>
+							<option value="<!--{$value}-->"><!--{$value}--></option>
 						<!--{/foreach}-->
 					</select>年
 					<select name="plg_OmisePaymentGateway_expiration_month" style="margin-left:10px;">
 						<!--{foreach from=$arrForm.plg_OmisePaymentGateway_expiration_months item=value}-->
-							<option value="<!--{$value}-->" <!--{if $arrForm.plg_OmisePaymentGateway_expiration_month.value == $value}-->selected="selected"<!--{/if}-->><!--{$value}--></option>
+							<option value="<!--{$value}-->"><!--{$value}--></option>
 						<!--{/foreach}-->
 					</select>月
 				</td>
@@ -68,7 +32,7 @@
 			
 			<tr>
 				<td bgcolor="#f3f3f3">セキュリティコード<span style="color:red;">※</span></td>
-				<td><input type="text" name="plg_OmisePaymentGateway_security_code" style="width:60px" value="<!--{$arrForm.plg_OmisePaymentGateway_security_code.value}-->"><br/>例）456<br/>セキュリティコードとは、カード裏面に印刷されている3桁から4桁の数字のことです。</td>
+				<td><input type="text" name="plg_OmisePaymentGateway_security_code" style="width:60px"><br/>例）456<br/>セキュリティコードとは、カード裏面に印刷されている3桁から4桁の数字のことです。</td>
 			</tr>
 		</tbody>
 	</table>
