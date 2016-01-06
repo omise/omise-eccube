@@ -105,12 +105,49 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	/* -------------------- Hook Points -------------------- */
 	/**
 	 * @param LC_Page_Shopping_Payment $objPage 
-	 * 支払い方法選択画面
+	 * 支払い方法選択画面に表示するオブジェクトのセット関連
 	 * @return void
 	 */
 	public function shoppingPaymentActionAfter($objPage) {
     	$info = self::selectConfig(self::CONFIG_PAYMENT);
 		$objPage->arrForm['plg_OmisePaymentGateway_payment_id'] = $info['credit_payment_id'];
+		$objPage->arrForm['plg_OmisePaymentGateway_expiration_years'] = array();
+		$objPage->arrForm['plg_OmisePaymentGateway_expiration_months'] = array();
+		
+		$y = date('Y');
+		$ey = $y + 10;
+		while($y <= $ey) {
+			$objPage->arrForm['plg_OmisePaymentGateway_expiration_years'][] = $y++;
+		}
+		for($i = 1; $i <= 12; ++$i) {
+			$objPage->arrForm['plg_OmisePaymentGateway_expiration_months'][] = sprintf('%02d', $i);;
+		}
+		
+		if($objPage->getMode() === 'confirm' && !isset($objPage->arrErr)) {
+			$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
+			if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
+				$this->initOmiseKeys();
+				try {
+					$token = OmiseToken::create(array(
+							'card' => array(
+									'name' => $objPage->arrForm['plg_OmisePaymentGateway_name']['value'],
+									'number' =>
+									$objPage->arrForm['plg_OmisePaymentGateway_credit_number1']['value'].
+									$objPage->arrForm['plg_OmisePaymentGateway_credit_number2']['value'].
+									$objPage->arrForm['plg_OmisePaymentGateway_credit_number3']['value'].
+									$objPage->arrForm['plg_OmisePaymentGateway_credit_number4']['value'],
+									'expiration_month' => $objPage->arrForm['plg_OmisePaymentGateway_expiration_month']['value'],
+									'expiration_year' => $objPage->arrForm['plg_OmisePaymentGateway_expiration_year']['value'],
+									'security_code' => $objPage->arrForm['plg_OmisePaymentGateway_security_code']['value'],
+							)
+					));
+					var_dump($token);
+				} catch(OmiseException $e) {
+					echo $e->getMessage();
+				}
+				die;
+			}
+		}
 	}
 
 	/**
@@ -118,40 +155,40 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 * 支払い方法確認画面
 	 * @return void
 	 */
-	public function shoppingPaymentActionConfirm($objPage) {
+	public function shoppingPaymentActionBefore($objPage) {
     	$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
     	if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
-    		$number = $_POST['omise_credit_number'];
-    		$name = $_POST['omise_name'];
-    		$expirationYear = $_POST['omise_expiration_year'];
-    		$expirationMonth = $_POST['omise_expiration_month'];
-    		$securityCode = $_POST['omise_security_code'];
-    		
-    		$configInfo = self::selectConfig(self::CONFIG_OIMISE);
-    		$configInfo['pkey'];
-    		$configInfo['skey'];
-    		
-    		// これまでのオーダ情報はセッションではなくtemp_orderテーブルに格納されているので要注意。
-    		// TODO 年明けここから。Omise-API叩く。
-//     		$objFormParam = new SC_FormParam_Ex();
-//     		$objFormParam->setParam($_POST);
-//     		$objFormParam->addParam('カード番号', 'omise_credit_number', '', '', array('EXIST_CHECK','NO_SPTAB'));
-//     		$objFormParam->addParam('氏名', 'omise_name', '', '', array('EXIST_CHECK','NO_SPTAB'));
-    		
-//     		$objPage->arrError = $objFormParam->checkError();
-
-//     		SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-//     		//SC_Response_Ex::actionExit();
+    		$param = new SC_FormParam_Ex();
+    		$param->addParam('カード番号1', 'plg_OmisePaymentGateway_credit_number1', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+    		$param->addParam('カード番号2', 'plg_OmisePaymentGateway_credit_number2', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+    		$param->addParam('カード番号3', 'plg_OmisePaymentGateway_credit_number3', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+    		$param->addParam('カード番号4', 'plg_OmisePaymentGateway_credit_number4', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+    		$param->addParam('カード名義人', 'plg_OmisePaymentGateway_name', STEXT_LEN, '', array('EXIST_CHECK','ALPHA_CHECK', 'MAX_LENGTH_CHECK'));
+    		$param->addParam('有効期限（年）', 'plg_OmisePaymentGateway_expiration_year', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+    		$param->addParam('有効期限（月）', 'plg_OmisePaymentGateway_expiration_month', 2, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+    		$param->addParam('セキュリティコード', 'plg_OmisePaymentGateway_security_code', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'MAX_LENGTH_CHECK'));
+    		$param->setParam($_POST);
+    		$param->convParam();
+    		$arrErr = $param->checkError();
+    		if(SC_Utils_Ex::isBlank($arrErr)) {
+    			die;
+    			$number = $_POST['plg_OmisePaymentGateway_credit_number1'].$_POST['plg_OmisePaymentGateway_credit_number2'].$_POST['plg_OmisePaymentGateway_credit_number3'].$_POST['plg_OmisePaymentGateway_credit_number4'];
+    			$name = $_POST['plg_OmisePaymentGateway_name'];
+    			$expirationYear = $_POST['plg_OmisePaymentGateway_expiration_year'];
+    			$expirationMonth = $_POST['plg_OmisePaymentGateway_expiration_month'];
+    			$securityCode = $_POST['plg_OmisePaymentGateway_security_code'];
+    			// これまでのオーダ情報はセッションではなくtemp_orderテーブルに格納されているので要注意。
+    			$this->initOmiseKeys();
+    			var_dump(OmiseAccount::retrieve());
+    			die;
+    			$objFormParam = new SC_FormParam_Ex();
+    			
+    			$objPage->arrError += ['omise_test_error' => 'テストエラー'];
+    			
+    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    			SC_Response_Ex::actionExit();
+    		}
     	}
-	}
-	
-	/**
-	 * @param LC_Page_Shopping_Confirm $objPage
-	 * 支払い方法確認画面
-	 * @return void
-	 */
-	public function shoppingConfirmActionAfter($objPage) {
-		
 	}
 	
 	//SC_FormParam
@@ -160,14 +197,14 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 			if(array_key_exists('payment_id', $_POST)) {
 	    		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
 				if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
-					$param->addParam('カード番号1', 'omise_credit_number1', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
-					$param->addParam('カード番号2', 'omise_credit_number2', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
-					$param->addParam('カード番号3', 'omise_credit_number3', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
-					$param->addParam('カード番号4', 'omise_credit_number4', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
-					$param->addParam('カード名義人', 'omise_name', STEXT_LEN, '', array('EXIST_CHECK','ALPHA_CHECK', 'MAX_LENGTH_CHECK'));
-					$param->addParam('有効期限（年）', 'omise_expiration_year', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
-					$param->addParam('有効期限（月）', 'omise_expiration_month', 2, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
-					$param->addParam('セキュリティコード', 'omise_security_code', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'MAX_LENGTH_CHECK'));
+					$param->addParam('カード番号1', 'plg_OmisePaymentGateway_credit_number1', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード番号2', 'plg_OmisePaymentGateway_credit_number2', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード番号3', 'plg_OmisePaymentGateway_credit_number3', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード番号4', 'plg_OmisePaymentGateway_credit_number4', CREDIT_NO_LEN, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('カード名義人', 'plg_OmisePaymentGateway_name', STEXT_LEN, '', array('EXIST_CHECK','ALPHA_CHECK', 'MAX_LENGTH_CHECK'));
+					$param->addParam('有効期限（年）', 'plg_OmisePaymentGateway_expiration_year', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('有効期限（月）', 'plg_OmisePaymentGateway_expiration_month', 2, 'n', array('EXIST_CHECK','NUM_CHECK', 'NUM_COUNT_CHECK'));
+					$param->addParam('セキュリティコード', 'plg_OmisePaymentGateway_security_code', 4, 'n', array('EXIST_CHECK','NUM_CHECK', 'MAX_LENGTH_CHECK'));
 				}
 			}
 		}
@@ -202,5 +239,12 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		ob_end_clean();
 		
 		return $str;
+	}
+	
+	private function initOmiseKeys() {
+		$configInfo = self::selectConfig(self::CONFIG_OIMISE);
+		
+		if(!defined('OMISE_PUBLIC_KEY')) define('OMISE_PUBLIC_KEY', $configInfo['pkey']);
+		if(!defined('OMISE_SECRET_KEY')) define('OMISE_SECRET_KEY', $configInfo['skey']);
 	}
 }
