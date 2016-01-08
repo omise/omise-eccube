@@ -117,10 +117,10 @@ $(function() {
 							$('#plg_OmisePaymentGateway_token').val(response.id);
 							$('#form1').submit();
 						} else {
-							plg_OmisePaymentGateway_show_error('無効なカードです。<br/>別のカードを入力するか、入力内容をお確かめください。');
+							plg_OmisePaymentGateway_show_error('このカードではお支払いいただけません。<br/>別のカードを入力するか、入力内容をお確かめください。');
 						}
 					} else {
-						plg_OmisePaymentGateway_show_error('無効なカードです。<br/>別のカードを入力するか、入力内容をお確かめください。');
+						plg_OmisePaymentGateway_show_error('このカードではお支払いいただけません。<br/>別のカードを入力するか、入力内容をお確かめください。');
 					};
 				});
 			} else {

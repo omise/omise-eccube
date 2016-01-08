@@ -45,12 +45,12 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     		case 'edit':
     			$arrForm = $objFormParam->getHashArray();
     			$this->arrErr = $objFormParam->checkError();
-    			// エラーなしの場合には疎通確認
+    			// エラーなしの場合にはOmiseAPIへの疎通確認
     			if (count($this->arrErr) == 0) {
     				$authrized = true;
     				
     				try {
-	    				// 正しいキーか確認
+	    				// キーが正しいか確認
 	    				define('OMISE_PUBLIC_KEY', $arrForm['pkey']);
 	    				define('OMISE_SECRET_KEY', $arrForm['skey']);
 	    				$omise = OmiseAccount::retrieve();
@@ -78,7 +78,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     						$this->tpl_onload = "alert('登録に失敗しました。再度お試しください。');";
     					}
     				} else {
-	    				$this->tpl_onload = "alert('キーが間違っているため登録できません。');";
+	    				$this->tpl_onload = "alert('Omiseに接続できません。キーが正しいかお確かめください。');";
     				}
 	    		}
     			
