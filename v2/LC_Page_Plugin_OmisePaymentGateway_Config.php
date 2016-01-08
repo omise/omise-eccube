@@ -45,8 +45,10 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     		case 'edit':
     			$arrForm = $objFormParam->getHashArray();
     			$this->arrErr = $objFormParam->checkError();
-    			// エラーなしの場合にはAPIから確認
+    			// エラーなしの場合には疎通確認
     			if (count($this->arrErr) == 0) {
+    				$authrized = true;
+    				
     				try {
 	    				// 正しいキーか確認
 	    				define('OMISE_PUBLIC_KEY', $arrForm['pkey']);
@@ -55,7 +57,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
 	    				$omise = OmiseToken::create(array(
 	    						'card' => array(
 	    								'name' => 'Somchai Prasert',
-	    								'number' => '4242424242424242',
+	    								'number' => '111',
 	    								'expiration_month' => 10,
 	    								'expiration_year' => 2018,
 	    								'city' => 'Bangkok',
@@ -63,12 +65,20 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
 	    								'security_code' => 123
 	    						)
 	    				));
-	    				
-	    				if(self::updateOmiseConfigInfo($arrForm) === 1) {
-							$this->tpl_onload = "alert('登録しました。');";
-	    				}
+    				} catch (OmiseAuthenticationFailureException $e) {
+    					$authrized = false;
     				} catch (OmiseException $e) {
-    					$this->tpl_onload = "alert('キーが間違っているため登録できません。');";
+    					/** Do Nothing **/
+    				}
+    				
+    				if($authrized) {
+    					if(self::updateOmiseConfigInfo($arrForm) === 1) {
+    						$this->tpl_onload = "alert('登録しました。');";
+    					} else {
+    						$this->tpl_onload = "alert('登録に失敗しました。再度お試しください。');";
+    					}
+    				} else {
+	    				$this->tpl_onload = "alert('キーが間違っているため登録できません。');";
     				}
 	    		}
     			
