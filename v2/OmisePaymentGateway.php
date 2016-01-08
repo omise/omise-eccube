@@ -207,17 +207,6 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$source = $objTransform->getHTML();
 	}
 	
-	private function includeTpl($fileName) {
-		$str = '';
-		
-		ob_start();
-		include $fileName;
-		$str = ob_get_contents();
-		ob_end_clean();
-		
-		return $str;
-	}
-	
 	private function initOmiseKeys() {
 		$configInfo = self::selectConfig(self::CONFIG_OIMISE);
 		
