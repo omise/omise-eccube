@@ -1,4 +1,4 @@
-<div id="plg_omisepaymentgateway_credit">
+<div id="plg_omisepaymentgateway_credit" style="display:none;">
 	<table>
 		<tbody>
 			<tr>
@@ -39,7 +39,7 @@
 </div>
 <script src="https://cdn2.omise.co/omise.js.gz"></script>
 <script type="text/javascript">
-$(function() {
+function plg_OmisePaymentGateway_init() {
 	// クレジットカード選択時の挙動
 	var rdo_payments = document.getElementsByName('payment_id');
 	var rdo_pay_len = rdo_payments.length;
@@ -61,8 +61,23 @@ $(function() {
 			}
 		}
 	}
+}
+
+$(function() {
+	plg_OmisePaymentGateway_init();
 
 	// Omiseキーの設定
 	Omise.setPublicKey('<!--{$arrForm.plg_OmisePaymentGateway_pkey}-->');
+
+	$(function() {
+		// 支払情報取得のajax完了時にクレジット入力欄をリセットする
+	    $(document).ajaxComplete(function(event, xhr, settings) {
+		    if(xhr.readyState == 4 && xhr.status == 200) {
+			    if('arrPayment' in xhr.responseJSON) {
+				    plg_OmisePaymentGateway_init();
+			    }
+		    }
+		})
+	});
 });
 </script>

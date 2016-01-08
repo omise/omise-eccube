@@ -195,7 +195,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 			case DEVICE_TYPE_SMARTPHONE:
 			case DEVICE_TYPE_PC:
 				if(strpos($filename, 'shopping/payment.tpl') !== false) {
-					$objTransform->select('#payment')->insertAfter($this->includeTpl(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/payment_credit.tpl'));
+					$objTransform->select('#payment')->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/payment_credit.tpl'));
 				}
 				break;
 	
