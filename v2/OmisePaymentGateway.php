@@ -117,7 +117,10 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		$objPage->arrForm['plg_OmisePaymentGateway_pkey'] = $info['pkey'];
 		$objPage->arrForm['plg_OmisePaymentGateway_expiration_years'] = array();
 		$objPage->arrForm['plg_OmisePaymentGateway_expiration_months'] = array();
-		
+		if(isset($_SESSION['plg_OmisePaymentGateway_error'])) {
+			$objPage->arrForm['plg_OmisePaymentGateway_error'] = $_SESSION['plg_OmisePaymentGateway_error'];
+			unset($_SESSION['plg_OmisePaymentGateway_error']);
+		}
 		
 		$y = date('Y');
 		$ey = $y + 10;
@@ -144,6 +147,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	    		$this->initOmiseKeys();
 	    		$token = OmiseToken::retrieve($tokenID);
     		} catch(OmiseException $e) {
+    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0001: 利用できないカードが選択されました。';
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
     		}
@@ -154,6 +158,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	    	$objQuery = &SC_Query_Ex::getSingletonInstance();
 	    	$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
 	    	if($count !== 1) {
+    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0002: サーバエラーが発生しました。カード決済がご利用いただけません。';
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
 	    	}
@@ -166,17 +171,57 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 * @return void
 	 */
 	public function shoppingConfirmActionAfter($objPage) {
+		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
 		$orderTempID = $this->getOrderTempID();
-		$dtbOrderTemp = $objQuery->select('session', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
+		$payment = $objQuery->select('payment_id, plg_omise_payment_gateway', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
 		
-		$session = unserialize($dtbOrderTemp[0]['session']);
-		
-		var_dump($session);
-		die;
-		
-		$objPage->arrForm['plg_OmisePaymentGateway_name'] = $info['pkey'];
-		$objPage->arrForm['plg_OmisePaymentGateway_number'] = array();
+		if($payment[0]['payment_id'] == $paymentInfo['credit_payment_id']) {
+			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = true;
+			$objOmise = unserialize($payment[0]['plg_omise_payment_gateway']);
+			try {
+				$this->initOmiseKeys();
+				$token = OmiseToken::retrieve($objOmise['token']);
+				$objPage->arrForm['plg_OmisePaymentGateway_name'] = $token['card']['name'];
+				$objPage->arrForm['plg_OmisePaymentGateway_number'] = '**** **** **** '.$token['card']['last_digits'];
+			} catch (OmiseException $e) {
+    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0003: 利用できないカードが選択されました。';
+    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    			SC_Response_Ex::actionExit();
+			}
+		} else {
+			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = false;
+		}
+	}
+	
+	/**
+	 * @param LC_Page_Shopping_Confirm $objPage
+	 * 決済完了画面に行く前にOmiseChargeを完了する
+	 * @return void
+	 */
+	public function shoppingConfirmActionBefore($objPage) {
+		if($objPage->getMode() == 'confirm') {
+			$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
+			$objQuery = &SC_Query_Ex::getSingletonInstance();
+			$orderTempID = $this->getOrderTempID();
+			$payment = $objQuery->select('payment_id, plg_omise_payment_gateway', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
+			
+			if($payment[0]['payment_id'] == $paymentInfo['credit_payment_id']) {
+				$objOmise = unserialize($payment[0]['plg_omise_payment_gateway']);
+				try {
+					$this->initOmiseKeys();
+					OmiseCharge::create(array(
+							'amount' => 1000,
+							'currency' => 'thb',
+							'card' => $objOmise['token']
+					));
+				} catch (OmiseException $e) {
+					$_SESSION['plg_OmisePaymentGateway_error'] = 'E0003: 利用できないカードが選択されました。';
+					SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+					SC_Response_Ex::actionExit();
+				}
+			}
+		}
 	}
 	
 	private function getOrderTempID() {

@@ -1,5 +1,5 @@
 <div id="plg_omisepaymentgateway_credit" style="display:none;">
-	<p class="attention" id="plg_OmisePaymentGateway_err"></p>
+	<p class="attention" id="plg_OmisePaymentGateway_err"><!--{$arrForm.plg_OmisePaymentGateway_error}--></p>
 	<input type="hidden" id="plg_OmisePaymentGateway_token" name="plg_OmisePaymentGateway_token" />
 	<table>
 		<tbody>
