@@ -60,12 +60,9 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		]);
 		
 		// 受注テーブルにOmiseToken用のカラムを追加
-		if(!in_array('plg_OmisePaymentGateway', $objQuery->listTableFields('dtb_order_temp'))) {
-			$objQuery->query('ALTER TABLE dtb_order_temp ADD plg_OmisePaymentGateway TEXT');
-		}
-		if(!in_array('plg_OmisePaymentGateway', $objQuery->listTableFields('dtb_order'))) {
-			$objQuery->query('ALTER TABLE dtb_order ADD plg_OmisePaymentGateway TEXT');
-		}
+		$objDb = new SC_Helper_DB_Ex();
+		$objDb->sfColumnExists('dtb_order_temp', 'plg_omise_payment_gateway', 'TEXT', '', true);
+		$objDb->sfColumnExists('dtb_order', 'plg_omise_payment_gateway', 'TEXT', '', true);
 	}
 
 	/**
@@ -152,10 +149,10 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     		}
 
     		// TokenIDに問題がないので、dtb_order_tempにTokenIDを追加
-    		$orderTempID = $_SESSION['site']['uniqid'];
+    		$orderTempID = $this->getOrderTempID();
     		$omiseObj = array('token' => $tokenID, 'charge' => '');
 	    	$objQuery = &SC_Query_Ex::getSingletonInstance();
-	    	$count = $objQuery->update('dtb_order_temp', array('plg_OmisePaymentGateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
+	    	$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
 	    	if($count !== 1) {
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
@@ -163,16 +160,39 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     	}
 	}
 	
+	/**
+	 * @param LC_Page_Shopping_Confirm $objPage
+	 * 入力内容確認画面で表示する情報の登録
+	 * @return void
+	 */
+	public function shoppingConfirmActionAfter($objPage) {
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+		$orderTempID = $this->getOrderTempID();
+		$dtbOrderTemp = $objQuery->select('session', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
+		
+		$session = unserialize($dtbOrderTemp[0]['session']);
+		
+		var_dump($session);
+		die;
+		
+		$objPage->arrForm['plg_OmisePaymentGateway_name'] = $info['pkey'];
+		$objPage->arrForm['plg_OmisePaymentGateway_number'] = array();
+	}
+	
+	private function getOrderTempID() {
+		return $_SESSION['site']['uniqid'];
+	}
+	
 	//SC_FormParam
 	public function addParam($class_name, $param) {
-		if(strpos($class_name, 'LC_Page_Shopping') !== false) {
-			if(array_key_exists('payment_id', $_POST)) {
-	    		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
-				if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
-					$param->addParam('Token', 'plg_OmisePaymentGateway_token', CREDIT_NO_LEN, '', array('EXIST_CHECK'), '', true);
-				}
-			}
-		}
+// 		if(strpos($class_name, 'LC_Page_Shopping') !== false) {
+// 			if(array_key_exists('payment_id', $_POST)) {
+// 	    		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
+// 				if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
+// 					$param->addParam('Token', 'plg_OmisePaymentGateway_token', CREDIT_NO_LEN, '', array('EXIST_CHECK'), '', true);
+// 				}
+// 			}
+// 		}
 	}
 	
 	// prefilterTransform
@@ -183,7 +203,9 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 			case DEVICE_TYPE_SMARTPHONE:
 			case DEVICE_TYPE_PC:
 				if(strpos($filename, 'shopping/payment.tpl') !== false) {
-					$objTransform->select('#payment')->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/payment_credit.tpl'));
+					$objTransform->select('#payment')->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/plg_OmisePaymentGateway_payment.tpl'));
+				} else if(strpos($filename, 'shopping/confirm.tpl') !== false) {
+					$objTransform->select('#form1 table', 5)->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/plg_OmisePaymentGateway_confirm.tpl'));
 				}
 				break;
 	
