@@ -103,8 +103,8 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	
 	private static function selectConfig($configName) {
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$info = $objQuery->select('info', self::TBL_OMISE_CONFIG, "name = '$configName'");
-		return unserialize($info[0]['info']);
+		$info = $objQuery->getRow('info', self::TBL_OMISE_CONFIG, "name = '$configName'");
+		return unserialize($info['info']);
 	}
 	
 	/* -------------------- Hook Points -------------------- */
@@ -143,33 +143,85 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	public function shoppingPaymentActionConfirm($objPage) {
 		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
     	if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
-    		$tokenID = $_POST['plg_OmisePaymentGateway_token'];
+    		$omiseTokenID = $_POST['plg_OmisePaymentGateway_token'];
 			
     		// TokenIDの検証
     		try {
 	    		$this->initOmiseKeys();
-	    		$token = OmiseToken::retrieve($tokenID);
+	    		$omiseToken = OmiseToken::retrieve($omiseTokenID);
 	    		
-	    		// TokenIDに問題がないので、Customerを作成してdtb_order_tempにTokenIDを追加
-	    		$customer = OmiseCustomer::create(array(
-	    				'card' => $tokenID
-	    			));
+	    		// TokenIDに問題がないので、Customerに追加してdtb_order_tempに反映
+	    		$omiseCustomerID = $this->getOmiseCustomerID();
 	    		$orderTempID = $this->getOrderTempID();
-	    		$omiseObj = array('customer' => $customer['id'], 'card' => $token['card']['id']);
-	    		// TODO このあたりから。
+	    		
+	    		$omiseCustomer = OmiseCustomer::retrieve($omiseCustomerID);
+	    		$omiseCustomer->update(array(
+		    			'card' => $omiseTokenID
+		    		));
+	    		
+	    		$omiseObj = array('customer' => $omiseCustomerID, 'card' => $omiseToken['card']['id']);
+	    		
 	    		$objQuery = &SC_Query_Ex::getSingletonInstance();
 	    		$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
 	    		if($count !== 1) {
-	    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0002: サーバエラーが発生しました。カード決済がご利用いただけません。';
+	    			$_SESSION['plg_OmisePaymentGateway_error'] = 'サーバエラーが発生しました。カード決済がご利用いただけません。';
 	    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
 	    			SC_Response_Ex::actionExit();
 	    		}
+	    		
+	    		// TODO 明日ここから。戻った場合に入力済のカードを利用できるようにする。
+	    		die;
     		} catch(OmiseException $e) {
-    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0001: 利用できないカードが選択されました。';
+    			$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
     		}
     	}
+	}
+	
+	/**
+	 * Omiseの顧客IDを返却する。
+	 * forcedNewがfalseの場合に顧客IDを選択する優先順位は、dtb_customer　＞　dtb_order_temp　＞　新規
+	 * 
+	 * @param string $forcedNew
+	 * @return unknown|OmiseCustomer
+	 */
+	private function getOmiseCustomerID($forcedNew = false) {
+		$this->initOmiseKeys();
+		
+		//$forcedNewがtrueなら強制的に顧客IDの新規払い出し
+		if($forcedNew) {
+			$omiseCustomer = OmiseCustomer::create(array());
+			return $omiseCustomer['id'];
+		}
+		
+		$objCustomer = new SC_Customer();
+		if($objCustomer->isLoginSuccess()) {
+			$customerID = $_SESSION['customer']['customer_id'];
+			
+			$objQuery = &SC_Query_Ex::getSingletonInstance();
+			$customer = $objQuery->getRow('plg_omise_payment_gateway_id', 'dtb_customer', 'customer_id = ?', array($customerID));
+			if(strlen($customer['plg_omise_payment_gateway_id']) > 0) {
+				return $customer['plg_omise_payment_gateway_id'];
+			} else {
+				$omiseCustomer = OmiseCustomer::create(array());
+				$objQuery->update('dtb_customer', array('plg_omise_payment_gateway_id' => $omiseCustomer['id'], 'update_date' => 'CURRENT_TIMESTAMP'), "customer_id = '$customerID'");
+				return $omiseCustomer['id'];
+			}
+		} else {
+			$orderTempID = $this->getOrderTempID();
+			$orderTemps = $objQuery->select('plg_omise_payment_gateway', 'dtb_order_temp', 'order_temp_id = ?', array($orderTempID));
+			
+			if(count($orderTemps) === 1) {
+				$omiseInfo = unserialize($orderTemps[0]['plg_omise_payment_gateway']);
+				if(isset($omiseInfo['customer'])) {
+					return $omiseInfo['customer'];
+				}
+			}
+			
+			$omiseCustomer = OmiseCustomer::create(array());
+			return $omiseCustomer['id'];
+		}
 	}
 	
 	/**
@@ -192,7 +244,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				$objPage->arrForm['plg_OmisePaymentGateway_name'] = $token['card']['name'];
 				$objPage->arrForm['plg_OmisePaymentGateway_number'] = '**** **** **** '.$token['card']['last_digits'];
 			} catch (OmiseException $e) {
-    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0003: 利用できないカードが選択されました。';
+    			$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
 			}
