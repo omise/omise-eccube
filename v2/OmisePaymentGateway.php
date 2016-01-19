@@ -59,10 +59,13 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				'update_date' => 'CURRENT_TIMESTAMP'
 		]);
 		
-		// 受注テーブルにOmiseToken用のカラムを追加
+		// 受注テーブルにOmise用のカラムを追加
 		$objDb = new SC_Helper_DB_Ex();
 		$objDb->sfColumnExists('dtb_order_temp', 'plg_omise_payment_gateway', 'TEXT', '', true);
 		$objDb->sfColumnExists('dtb_order', 'plg_omise_payment_gateway', 'TEXT', '', true);
+		
+		// 顧客テーブルにOmise顧客ID用のカラムを追加
+		$objDb->sfColumnExists('dtb_customer', 'plg_omise_payment_gateway_id', 'TEXT', '', true);
 	}
 
 	/**
@@ -146,22 +149,26 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     		try {
 	    		$this->initOmiseKeys();
 	    		$token = OmiseToken::retrieve($tokenID);
+	    		
+	    		// TokenIDに問題がないので、Customerを作成してdtb_order_tempにTokenIDを追加
+	    		$customer = OmiseCustomer::create(array(
+	    				'card' => $tokenID
+	    			));
+	    		$orderTempID = $this->getOrderTempID();
+	    		$omiseObj = array('customer' => $customer['id'], 'card' => $token['card']['id']);
+	    		// TODO このあたりから。
+	    		$objQuery = &SC_Query_Ex::getSingletonInstance();
+	    		$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
+	    		if($count !== 1) {
+	    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0002: サーバエラーが発生しました。カード決済がご利用いただけません。';
+	    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+	    			SC_Response_Ex::actionExit();
+	    		}
     		} catch(OmiseException $e) {
     			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0001: 利用できないカードが選択されました。';
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
     		}
-
-    		// TokenIDに問題がないので、dtb_order_tempにTokenIDを追加
-    		$orderTempID = $this->getOrderTempID();
-    		$omiseObj = array('token' => $tokenID, 'charge' => '');
-	    	$objQuery = &SC_Query_Ex::getSingletonInstance();
-	    	$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
-	    	if($count !== 1) {
-    			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0002: サーバエラーが発生しました。カード決済がご利用いただけません。';
-    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-    			SC_Response_Ex::actionExit();
-	    	}
     	}
 	}
 	

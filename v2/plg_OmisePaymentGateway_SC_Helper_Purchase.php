@@ -102,4 +102,25 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 	
 		GC_Utils_Ex::gfPrintLog('order complete. order_id=' . $order_id);
 	}
+	
+	/**
+	 * 受注をキャンセルする.
+	 * cancelOrderとあるが、ECCUBE受注管理画面のキャンセルではない。削除に該当する処理。
+	 *
+	 * 受注完了後の受注をキャンセルする.
+	 * この関数は, 主に決済モジュールにて, 受注をキャンセルする場合に使用する.
+	 *
+	 * 対応状況を引数 $orderStatus で指定した値に変更する.
+	 * (デフォルト ORDER_CANCEL)
+	 * 引数 $is_delete が true の場合は, 受注データを論理削除する.
+	 * 商品の在庫数は, 受注前の在庫数に戻される.
+	 *
+	 * @param  integer $order_id    受注ID
+	 * @param  integer $orderStatus 対応状況
+	 * @param  boolean $is_delete   受注データを論理削除する場合 true
+	 * @return void
+	 */
+	public function cancelOrder($order_id, $orderStatus = ORDER_CANCEL, $is_delete = false) {
+		parent::cancelOrder($order_id, $orderStatus, $is_delete);
+	}
 }
