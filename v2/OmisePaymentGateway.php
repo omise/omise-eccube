@@ -194,50 +194,16 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		}
 	}
 	
-	/**
-	 * @param LC_Page_Shopping_Confirm $objPage
-	 * 決済完了画面に行く前にOmiseChargeを完了する
-	 * @return void
-	 */
-	public function shoppingConfirmActionBefore($objPage) {
-		if($objPage->getMode() == 'confirm') {
-			$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
-			$objQuery = &SC_Query_Ex::getSingletonInstance();
-			$orderTempID = $this->getOrderTempID();
-			$payment = $objQuery->select('payment_id, plg_omise_payment_gateway', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
-			
-			if($payment[0]['payment_id'] == $paymentInfo['credit_payment_id']) {
-				$objOmise = unserialize($payment[0]['plg_omise_payment_gateway']);
-				try {
-					$this->initOmiseKeys();
-					OmiseCharge::create(array(
-							'amount' => 1000,
-							'currency' => 'thb',
-							'card' => $objOmise['token']
-					));
-				} catch (OmiseException $e) {
-					$_SESSION['plg_OmisePaymentGateway_error'] = 'E0003: 利用できないカードが選択されました。';
-					SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-					SC_Response_Ex::actionExit();
-				}
-			}
-		}
-	}
-	
 	private function getOrderTempID() {
 		return $_SESSION['site']['uniqid'];
 	}
 	
-	//SC_FormParam
-	public function addParam($class_name, $param) {
-// 		if(strpos($class_name, 'LC_Page_Shopping') !== false) {
-// 			if(array_key_exists('payment_id', $_POST)) {
-// 	    		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
-// 				if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
-// 					$param->addParam('Token', 'plg_OmisePaymentGateway_token', CREDIT_NO_LEN, '', array('EXIST_CHECK'), '', true);
-// 				}
-// 			}
-// 		}
+	// loadClassFileChange
+	public function loadClassFileChange(&$classname, &$classpath) {
+		if($classname == 'SC_Helper_Purchase_Ex') {
+			$classpath = PLUGIN_UPLOAD_REALDIR . 'OmisePaymentGateway/plg_OmisePaymentGateway_SC_Helper_Purchase.php';
+			$classname = 'plg_OmisePaymentGateway_SC_Helper_Purchase';
+		}
 	}
 	
 	// prefilterTransform
