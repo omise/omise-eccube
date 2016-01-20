@@ -314,7 +314,35 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	 * @return void
 	 */
 	public function adminOrderEditActionAfter($objPage) {
+		$orderID = $_POST['order_id'];
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
 		
+		$objOrder = $objQuery->getRow('payment_total, plg_omise_payment_gateway', 'dtb_order', 'order_id = ?', array($orderID));
+		
+		if($objOrder['plg_omise_payment_gateway'] != null) {
+			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = true;
+			$this->initOmiseKeys();
+			$objOmise = unserialize($objOrder['plg_omise_payment_gateway']);
+			
+			$objOmiseCharge = OmiseCharge::retrieve($objOmise['charge']);
+
+			$objPage->arrForm['plg_OmisePaymentGateway_charge'] = $objOmise['charge'];
+			if($objOmiseCharge['captured']) {
+				$objPage->arrForm['plg_OmisePaymentGateway_status'] = '売上確定済み';
+			} else {
+				$objPage->arrForm['plg_OmisePaymentGateway_status'] = '仮売上済み';
+			}
+			$objPage->arrForm['plg_OmisePaymentGateway_amount'] = $objOmiseCharge['amount'].'円';
+			$objPage->arrForm['plg_OmisePaymentGateway_create_date'] = date("Y/m/d H:i:s", strtotime($objOmiseCharge['created']));
+			
+			if($objOmiseCharge['amount'] != $objOrder['payment_total']) {
+				$objPage->arrForm['plg_OmisePaymentGateway_amount_warning'] = '<span style="color:red;margin-left:30px;">※ お支払い合計が '.$objOrder['payment_total'].'円 に変更されています。決済金額変更ボタンを押して確定してください。</span>';
+			}
+			
+			// TODO 決済関係の確定処理の追加や、店舗管理者への警告を出してあげると親切
+		} else {
+			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = false;
+		}
 	}
 	
 	// loadClassFileChange

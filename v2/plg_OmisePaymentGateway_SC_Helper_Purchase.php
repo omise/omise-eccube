@@ -82,7 +82,7 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 		} catch (Exception $e) {
 			$objQuery->rollback();
 			$this->rollbackOrder($uniqId);
-			$_SESSION['plg_OmisePaymentGateway_error'] = 'E0004: '.$e->getMessage();
+			$_SESSION['plg_OmisePaymentGateway_error'] = $e->getMessage();
 			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
 			SC_Response_Ex::actionExit();
 		}
