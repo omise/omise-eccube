@@ -208,12 +208,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     					$omiseObj = array('customer' => $omiseCustomerID, 'card' => $omiseToken['card']['id']);
     					 
     					$objQuery = &SC_Query_Ex::getSingletonInstance();
-    					$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
-    					if($count !== 1) {
-    						$_SESSION['plg_OmisePaymentGateway_error'] = 'サーバエラーが発生しました。';
-    						SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-    						SC_Response_Ex::actionExit();
-    					}
+    					$objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
     				} catch(OmiseException $e) {
     					$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
     					SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
@@ -251,12 +246,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     					$omiseObj = array('customer' => $omiseCustomerID, 'card' => $omiseCardID);
     					
     					$objQuery = &SC_Query_Ex::getSingletonInstance();
-    					$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
-    					if($count !== 1) {
-    						$_SESSION['plg_OmisePaymentGateway_error'] = 'サーバエラーが発生しました。';
-    						SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-    						SC_Response_Ex::actionExit();
-    					}
+    					$objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
     				} catch(OmiseException $e) {
     					$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
     					SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
