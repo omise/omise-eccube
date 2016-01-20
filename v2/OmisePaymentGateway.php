@@ -164,46 +164,186 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 
 	/**
 	 * @param LC_Page_Shopping_Payment $objPage
-	 * OmiseTokenの検証〜dtb_temp_orderへTokenの保存
+	 * OmiseTokenの検証〜dtb_temp_orderへ決済情報の保存
 	 * @return void
 	 */
 	public function shoppingPaymentActionConfirm($objPage) {
 		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
     	if($_POST['payment_id'] == $paymentInfo['credit_payment_id']) {
-    		$omiseTokenID = $_POST['plg_OmisePaymentGateway_token'];
-			
-    		// TokenIDの検証
-    		try {
-	    		$this->initOmiseKeys();
-	    		$omiseToken = OmiseToken::retrieve($omiseTokenID);
-	    		
-	    		// TokenIDに問題がないので、Customerに追加してdtb_order_tempに反映
-	    		$omiseCustomerID = $this->getOmiseCustomerID();
-	    		$orderTempID = $this->getOrderTempID();
-	    		
-	    		$omiseCustomer = OmiseCustomer::retrieve($omiseCustomerID);
-	    		$omiseCustomer->update(array(
-		    			'card' => $omiseTokenID
-		    		));
-	    		
-	    		$omiseObj = array('customer' => $omiseCustomerID, 'card' => $omiseToken['card']['id']);
-	    		
-	    		$objQuery = &SC_Query_Ex::getSingletonInstance();
-	    		$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
-	    		if($count !== 1) {
-	    			$_SESSION['plg_OmisePaymentGateway_error'] = 'サーバエラーが発生しました。カード決済がご利用いただけません。';
-	    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-	    			SC_Response_Ex::actionExit();
-	    		}
-	    		
-	    		// TODO 明日ここから。戻った場合に入力済のカードを利用できるようにする。
-	    		die;
-    		} catch(OmiseException $e) {
-    			$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
+    		if(!isset($_POST['plg_OmisePaymentGateway_card_select']) || strlen($_POST['plg_OmisePaymentGateway_card_select']) <= 0) {
+    			$_SESSION['plg_OmisePaymentGateway_error'] = '不正な入力を検知しました。再度お試しください。';
     			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
     			SC_Response_Ex::actionExit();
     		}
+    		
+    		$omiseCardPostObj = $_POST['plg_OmisePaymentGateway_card_select'];
+    		$omiseCardPostObjAry = preg_split('/,/', $omiseCardPostObj);
+			
+    		$postError = false;
+    		switch ($omiseCardPostObjAry[0]) {
+    			case 'new':
+    				if(count($omiseCardPostObjAry) != 2) $postError = true;
+    				// TokenIDの検証
+    				try {
+    					$this->initOmiseKeys();
+    					$omiseToken = OmiseToken::retrieve($omiseCardPostObjAry[1]);
+    					 
+    					// TokenIDに問題がないので、Customerに追加してdtb_order_tempに反映
+    					if(@$_POST['plg_OmisePaymentGateway_memory'] == 1) {
+    						$omiseCustomerID = $this->getOmiseCustomerID();
+    					} else {
+    						$omiseCustomerID = $this->getOmiseCustomerID(true);
+    					}
+    					
+    					$orderTempID = $this->getOrderTempID();
+    					 
+    					$omiseCustomer = OmiseCustomer::retrieve($omiseCustomerID);
+    					$omiseCustomer->update(array(
+    							'card' => $omiseCardPostObjAry[1]
+    					));
+    					 
+    					$omiseObj = array('customer' => $omiseCustomerID, 'card' => $omiseToken['card']['id']);
+    					 
+    					$objQuery = &SC_Query_Ex::getSingletonInstance();
+    					$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
+    					if($count !== 1) {
+    						$_SESSION['plg_OmisePaymentGateway_error'] = 'サーバエラーが発生しました。';
+    						SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    						SC_Response_Ex::actionExit();
+    					}
+    				} catch(OmiseException $e) {
+    					$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
+    					SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    					SC_Response_Ex::actionExit();
+    				}
+    				
+    				break;
+    				
+    			case 'existing':
+    				if(count($omiseCardPostObjAry) != 3) $postError = true;
+    				// CustomerとCardの検証
+    				try {
+    					$this->initOmiseKeys();
+    					$omiseCustomerID = $omiseCardPostObjAry[1];
+    					$omiseCardID = $omiseCardPostObjAry[2];
+    					$omiseCustomer = OmiseCustomer::retrieve($omiseCustomerID);
+    					
+    					$omiseCardFind = false;
+    					foreach ($omiseCustomer['cards']['data'] as $row) {
+    						if($row['id'] === $omiseCardID) {
+    							$omiseCardFind = true;
+    							break;
+    						}
+    					}
+    					if(!$omiseCardFind) {
+    						throw new OmiseException('選択されたカードが見つかりませんでした。');
+    					}
+    					
+    					// Cardに問題がないのでDBに決済情報の保存
+    					$orderTempID = $this->getOrderTempID();
+    					
+    					$omiseObj = array('customer' => $omiseCustomerID, 'card' => $omiseCardID);
+    					
+    					$objQuery = &SC_Query_Ex::getSingletonInstance();
+    					$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObj), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '$orderTempID'");
+    					if($count !== 1) {
+    						$_SESSION['plg_OmisePaymentGateway_error'] = 'サーバエラーが発生しました。';
+    						SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    						SC_Response_Ex::actionExit();
+    					}
+    				} catch(OmiseException $e) {
+    					$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
+    					SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    					SC_Response_Ex::actionExit();
+    				}
+    				
+    				break;
+    				
+    			default:
+    				$postError = true;
+    				break;
+    		}
+    		if($postError) {
+				$_SESSION['plg_OmisePaymentGateway_error'] = '不正な入力を検知しました。再度お試しください。';
+				SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+				SC_Response_Ex::actionExit();
+    		}
     	}
+	}
+	
+	/**
+	 * @param LC_Page_Shopping_Confirm $objPage
+	 * 入力内容確認画面で表示する情報の登録
+	 * @return void
+	 */
+	public function shoppingConfirmActionAfter($objPage) {
+		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
+		$objQuery = &SC_Query_Ex::getSingletonInstance();
+		$orderTempID = $this->getOrderTempID();
+		$payment = $objQuery->getRow('payment_id, plg_omise_payment_gateway', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
+		
+		if($payment['payment_id'] == $paymentInfo['credit_payment_id']) {
+			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = true;
+			$objOmise = unserialize($payment['plg_omise_payment_gateway']);
+			try {
+				$this->initOmiseKeys();
+				$omiseCustomer = OmiseCustomer::retrieve($objOmise['customer']);
+			
+    			$omiseCard = null;
+    			foreach ($omiseCustomer['cards']['data'] as $row) {
+    				if($row['id'] === $objOmise['card']) {
+    					$omiseCard = $row;
+    					break;
+    				}
+    			}
+    			if($omiseCard == null) {
+    				throw new OmiseException('選択されたカードが見つかりませんでした。');
+    			}
+				
+				$objPage->arrForm['plg_OmisePaymentGateway_name'] = $omiseCard['name'];
+				$objPage->arrForm['plg_OmisePaymentGateway_number'] = '**** **** **** '.$omiseCard['last_digits'];
+			} catch (OmiseException $e) {
+    			$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
+    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
+    			SC_Response_Ex::actionExit();
+			}
+		} else {
+			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = false;
+		}
+	}
+	
+	// loadClassFileChange
+	public function loadClassFileChange(&$classname, &$classpath) {
+		if($classname == 'SC_Helper_Purchase_Ex') {
+			$classpath = PLUGIN_UPLOAD_REALDIR . 'OmisePaymentGateway/plg_OmisePaymentGateway_SC_Helper_Purchase.php';
+			$classname = 'plg_OmisePaymentGateway_SC_Helper_Purchase';
+		}
+	}
+	
+	// prefilterTransform
+	public function prefilterTransform(&$source, LC_Page_Ex $objPage, $filename) {
+		$objTransform = new SC_Helper_Transform($source);
+		switch ($objPage->arrPageLayout['device_type_id']) {
+			case DEVICE_TYPE_MOBILE:
+			case DEVICE_TYPE_SMARTPHONE:
+			case DEVICE_TYPE_PC:
+				if(strpos($filename, 'shopping/payment.tpl') !== false) {
+					$objTransform->select('#payment')->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/plg_OmisePaymentGateway_payment.tpl'));
+				} else if(strpos($filename, 'shopping/confirm.tpl') !== false) {
+					$objTransform->select('#form1 table', 5)->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/plg_OmisePaymentGateway_confirm.tpl'));
+				}
+				break;
+	
+			case DEVICE_TYPE_ADMIN:
+			default:
+				break;
+		}
+	
+		$source = $objTransform->getHTML();
+	}
+	
+	private function getOrderTempID() {
+		return $_SESSION['site']['uniqid'];
 	}
 	
 	/**
@@ -249,69 +389,6 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 			$omiseCustomer = OmiseCustomer::create(array());
 			return $omiseCustomer['id'];
 		}
-	}
-	
-	/**
-	 * @param LC_Page_Shopping_Confirm $objPage
-	 * 入力内容確認画面で表示する情報の登録
-	 * @return void
-	 */
-	public function shoppingConfirmActionAfter($objPage) {
-		$paymentInfo = self::selectConfig(self::CONFIG_PAYMENT);
-		$objQuery = &SC_Query_Ex::getSingletonInstance();
-		$orderTempID = $this->getOrderTempID();
-		$payment = $objQuery->select('payment_id, plg_omise_payment_gateway', 'dtb_order_temp', "order_temp_id = '$orderTempID'");
-		
-		if($payment[0]['payment_id'] == $paymentInfo['credit_payment_id']) {
-			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = true;
-			$objOmise = unserialize($payment[0]['plg_omise_payment_gateway']);
-			try {
-				$this->initOmiseKeys();
-				$token = OmiseToken::retrieve($objOmise['token']);
-				$objPage->arrForm['plg_OmisePaymentGateway_name'] = $token['card']['name'];
-				$objPage->arrForm['plg_OmisePaymentGateway_number'] = '**** **** **** '.$token['card']['last_digits'];
-			} catch (OmiseException $e) {
-    			$_SESSION['plg_OmisePaymentGateway_error'] = 'エラーが発生しました。'.$e->getMessage();
-    			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
-    			SC_Response_Ex::actionExit();
-			}
-		} else {
-			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = false;
-		}
-	}
-	
-	private function getOrderTempID() {
-		return $_SESSION['site']['uniqid'];
-	}
-	
-	// loadClassFileChange
-	public function loadClassFileChange(&$classname, &$classpath) {
-		if($classname == 'SC_Helper_Purchase_Ex') {
-			$classpath = PLUGIN_UPLOAD_REALDIR . 'OmisePaymentGateway/plg_OmisePaymentGateway_SC_Helper_Purchase.php';
-			$classname = 'plg_OmisePaymentGateway_SC_Helper_Purchase';
-		}
-	}
-	
-	// prefilterTransform
-	public function prefilterTransform(&$source, LC_Page_Ex $objPage, $filename) {
-		$objTransform = new SC_Helper_Transform($source);
-		switch ($objPage->arrPageLayout['device_type_id']) {
-			case DEVICE_TYPE_MOBILE:
-			case DEVICE_TYPE_SMARTPHONE:
-			case DEVICE_TYPE_PC:
-				if(strpos($filename, 'shopping/payment.tpl') !== false) {
-					$objTransform->select('#payment')->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/plg_OmisePaymentGateway_payment.tpl'));
-				} else if(strpos($filename, 'shopping/confirm.tpl') !== false) {
-					$objTransform->select('#form1 table', 5)->insertAfter(file_get_contents(PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/templates/shopping/plg_OmisePaymentGateway_confirm.tpl'));
-				}
-				break;
-	
-			case DEVICE_TYPE_ADMIN:
-			default:
-				break;
-		}
-	
-		$source = $objTransform->getHTML();
 	}
 	
 	private function initOmiseKeys() {

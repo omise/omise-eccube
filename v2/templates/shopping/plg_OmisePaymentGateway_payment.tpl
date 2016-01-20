@@ -147,7 +147,7 @@ $(function() {
 				Omise.createToken("card", card, function (statusCode, response) {
 					if (statusCode == 200) {
 						if(response.id != undefined && response.card.security_code_check == true) {
-							$('#plg_OmisePaymentGateway_token').val(response.id);
+							$('#plg_OmisePaymentGateway_token').val('new' + ',' + response.id);
 							$('#form1').submit();
 						} else {
 							plg_OmisePaymentGateway_show_error('このカードではお支払いいただけません。<br/>別のカードを入力するか、入力内容をお確かめください。');
