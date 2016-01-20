@@ -1,21 +1,47 @@
 <div id="plg_omisepaymentgateway_credit" style="display:none;">
+	<h3>クレジットカード情報の入力</h3>
+	<p class="select-msg">利用するクレジットカードを選択または入力してください。</p>
+	<p class="non-select-msg">利用するクレジットカードを選択または入力してください。</p>
 	<p class="attention" id="plg_OmisePaymentGateway_err"><!--{$arrForm.plg_OmisePaymentGateway_error}--></p>
-	<input type="hidden" id="plg_OmisePaymentGateway_token" name="plg_OmisePaymentGateway_token" />
+	<input type="hidden" name="plg_OmisePaymentGateway_token" />
+	
 	<table>
+		<thead>
+			<tr>
+				<th class="alignC">選択</th>
+				<th class="alignC" colspan="2">お使いになるカード</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!--{foreach from=$arrForm.plg_OmisePaymentGateway_customer_cards item=value}-->
+			<tr>
+				<td class="alignC"><input type="radio" name="plg_OmisePaymentGateway_card_select" id="<!--{$value.id}-->" onclick="<!--{$value.onclick}-->" value="<!--{$value.value}-->" <!--{$value.checked}--> /></td>
+				<td><label for="<!--{$value.id}-->"><!--{$value.display}--></label></td>
+			</tr>
+			<!--{/foreach}-->
+		</tbody>
+	</table>
+	
+	<table id="plg_OmisePaymentGateway_tbl_new_card">
+		<thead>
+			<tr>
+				<th class="alignC" colspan="2">入力してください</th>
+			</tr>
+		</thead>
 		<tbody>
 			<tr>
-				<td bgcolor="#f3f3f3">カード番号<span style="color:red;">※</span></td>
+				<td>カード番号<span style="color:red;">※</span></td>
 				<td><input type="text" id="plg_OmisePaymentGateway_credit_number" style="width:300px">
 				
 				<br/>例）0123456789012345
 				<br/>※ハイフンは入力してないでください。</td>
 			</tr>
 			<tr>
-				<td bgcolor="#f3f3f3">カード名義人<span style="color:red;">※</span></td>
+				<td>カード名義人<span style="color:red;">※</span></td>
 				<td><input type="text" id="plg_OmisePaymentGateway_name" style="width:300px"><br/>例）TARO SUZUKI</td>
 			</tr>
 			<tr>
-				<td bgcolor="#f3f3f3">有効期限<span style="color:red;">※</span></td>
+				<td>有効期限<span style="color:red;">※</span></td>
 				<td>
 					<select id="plg_OmisePaymentGateway_expiration_year">
 						<!--{foreach from=$arrForm.plg_OmisePaymentGateway_expiration_years item=value}-->
@@ -31,9 +57,16 @@
 			</tr>
 			
 			<tr>
-				<td bgcolor="#f3f3f3">セキュリティコード<span style="color:red;">※</span></td>
+				<td>セキュリティコード<span style="color:red;">※</span></td>
 				<td><input type="text" id="plg_OmisePaymentGateway_security_code" style="width:60px"><br/>例）456<br/>セキュリティコードとは、カード裏面に印刷されている3桁から4桁の数字のことです。</td>
 			</tr>
+			
+			<!--{if $tpl_login}-->
+			<tr>
+				<td>カードを記憶する</td>
+				<td><label for="plg_OmisePaymentGateway_memory"><input type="checkbox" name="plg_OmisePaymentGateway_memory" id="plg_OmisePaymentGateway_memory" value="1" />記憶する</label><br/>カードを記憶すると、次回から入力の手間が省けます。</td>
+			</tr>
+			<!--{/if}-->
 		</tbody>
 	</table>
 </div>
@@ -91,8 +124,8 @@ $(function() {
 	Omise.setPublicKey('<!--{$arrForm.plg_OmisePaymentGateway_pkey}-->');
 	
 	// submit時にOmiseAPIからTokenを取得する
-	$('#form1').submit(function() {$("[name='radio_group']:checked")
-		if($("input:radio[name='payment_id']:checked").val() == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}-->) {
+	$('#form1').submit(function() {
+		if($("input:radio[name='payment_id']:checked").val() == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}--> && $('#plg_OmisePaymentGateway_token').is(':checked')) {
 			if($('#plg_OmisePaymentGateway_token').val().length > 0) return true;
 			
 			var number = $('#plg_OmisePaymentGateway_credit_number').val();

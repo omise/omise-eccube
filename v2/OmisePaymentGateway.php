@@ -124,6 +124,8 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 			$objPage->arrForm['plg_OmisePaymentGateway_error'] = $_SESSION['plg_OmisePaymentGateway_error'];
 			unset($_SESSION['plg_OmisePaymentGateway_error']);
 		}
+		$objCustomer = new SC_Customer();
+		if($objCustomer->isLoginSuccess()) $objPage->tpl_login = true;
 		
 		$y = date('Y');
 		$ey = $y + 10;
@@ -132,6 +134,31 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 		}
 		for($i = 1; $i <= 12; ++$i) {
 			$objPage->arrForm['plg_OmisePaymentGateway_expiration_months'][] = sprintf('%02d', $i);;
+		}
+		
+		// カード情報の取得
+		$objPage->arrForm['plg_OmisePaymentGateway_customer_cards'] = array();
+		$objPage->arrForm['plg_OmisePaymentGateway_customer_cards'][] = array(
+				'id' => 'plg_OmisePaymentGateway_token',
+				'value' => '',
+				'display' => '新規入力',
+				'onclick' => "$('#plg_OmisePaymentGateway_tbl_new_card').css({display:'table'})",
+				'checked' => 'checked="checked"');
+		$omiseCustomerID = $this->getOmiseCustomerID();
+		try {
+			$omiseCustomer = OmiseCustomer::retrieve($omiseCustomerID);
+			$i = 0;
+			foreach ($omiseCustomer['cards']['data'] as $row) {
+				$objPage->arrForm['plg_OmisePaymentGateway_customer_cards'][] = array(
+						'id' => 'plg_OmisePaymentGateway_card_select'.$i, 
+						'value' => 'existing'.','.$omiseCustomer['id'].','.$row['id'], 
+						'display' => '**** **** **** '.$row['last_digits'], 
+						'onclick' => "$('#plg_OmisePaymentGateway_tbl_new_card').css({display:'none'})",
+						'checked' => '');
+				++$i;
+			}
+		} catch(OmiseException $e) {
+			/** Do Nothing */
 		}
 	}
 
@@ -181,9 +208,9 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	
 	/**
 	 * Omiseの顧客IDを返却する。
-	 * forcedNewがfalseの場合に顧客IDを選択する優先順位は、dtb_customer　＞　dtb_order_temp　＞　新規
+	 * $forcedNewがtrueなら問答無用で新規作成
 	 * 
-	 * @param string $forcedNew
+	 * @param boolean $forcedNew
 	 * @return unknown|OmiseCustomer
 	 */
 	private function getOmiseCustomerID($forcedNew = false) {
