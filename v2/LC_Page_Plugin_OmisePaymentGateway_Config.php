@@ -69,6 +69,8 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
     					$authrized = false;
     				} catch (OmiseException $e) {
     					/** Do Nothing **/
+    				} catch (Exception $e) {
+    					$authrized = false;
     				}
     				
     				if($authrized) {
