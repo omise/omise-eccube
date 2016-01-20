@@ -3,6 +3,8 @@ require_once CLASS_REALDIR . 'helper/SC_Helper_Purchase.php';
 require_once PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/omise-php/lib/Omise.php';
 
 class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
+	private $plg_OmisePaymentGateway_currency = 'thb';
+	
 	/**
 	 * 受注を完了する.
 	 *
@@ -54,14 +56,14 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 				if(!defined('OMISE_PUBLIC_KEY')) define('OMISE_PUBLIC_KEY', $omiseConfigInfo['pkey']);
 				if(!defined('OMISE_SECRET_KEY')) define('OMISE_SECRET_KEY', $omiseConfigInfo['skey']);
 				
-				// Token情報を取得
+				// Omise決済情報を取得
 				$omiseObject = unserialize($orderTemp['plg_omise_payment_gateway']);
-				
-				// 決済の発行
+				// 仮売上計上
 				$omiseCharge = OmiseCharge::create(array(
 						'amount' => $orderTemp['payment_total'],
-						'currency' => 'thb',
-						'card' => $omiseObject['token'],
+						'currency' => $this->plg_OmisePaymentGateway_currency,
+						'customer' => $omiseObject['customer'],
+						'card' => $omiseObject['card'],
 						'capture' => false
 					));
 				
@@ -72,6 +74,10 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 				if($count != 1) {
 					throw new Exception('OmisePaymentGateway 決済処理中にエラーが発生しました。');
 				}
+			} else {
+				// Omise決済ではない場合、Omise決済のデータを削除する
+				$objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => null, 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '".$orderTemp['order_temp_id']."'");
+				$orderTemp['plg_omise_payment_gateway'] = null;
 			}
 		} catch (Exception $e) {
 			$objQuery->rollback();
@@ -101,26 +107,5 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 		$this->cleanupSession($order_id, $objCartSession, $objCustomer, $cartkey);
 	
 		GC_Utils_Ex::gfPrintLog('order complete. order_id=' . $order_id);
-	}
-	
-	/**
-	 * 受注をキャンセルする.
-	 * cancelOrderとあるが、ECCUBE受注管理画面のキャンセルではない。削除に該当する処理。
-	 *
-	 * 受注完了後の受注をキャンセルする.
-	 * この関数は, 主に決済モジュールにて, 受注をキャンセルする場合に使用する.
-	 *
-	 * 対応状況を引数 $orderStatus で指定した値に変更する.
-	 * (デフォルト ORDER_CANCEL)
-	 * 引数 $is_delete が true の場合は, 受注データを論理削除する.
-	 * 商品の在庫数は, 受注前の在庫数に戻される.
-	 *
-	 * @param  integer $order_id    受注ID
-	 * @param  integer $orderStatus 対応状況
-	 * @param  boolean $is_delete   受注データを論理削除する場合 true
-	 * @return void
-	 */
-	public function cancelOrder($order_id, $orderStatus = ORDER_CANCEL, $is_delete = false) {
-		parent::cancelOrder($order_id, $orderStatus, $is_delete);
 	}
 }
