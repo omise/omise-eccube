@@ -178,11 +178,14 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     		
     		$omiseCardPostObj = $_POST['plg_OmisePaymentGateway_card_select'];
     		$omiseCardPostObjAry = preg_split('/,/', $omiseCardPostObj);
-			
+    		
     		$postError = false;
     		switch ($omiseCardPostObjAry[0]) {
     			case 'new':
-    				if(count($omiseCardPostObjAry) != 2) $postError = true;
+    				if(count($omiseCardPostObjAry) != 2) {
+    					$postError = true;
+    					break;
+    				}
     				// TokenIDの検証
     				try {
     					$this->initOmiseKeys();
@@ -220,7 +223,10 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     				break;
     				
     			case 'existing':
-    				if(count($omiseCardPostObjAry) != 3) $postError = true;
+    				if(count($omiseCardPostObjAry) != 3) {
+    					$postError = true;
+    					break;
+    				}
     				// CustomerとCardの検証
     				try {
     					$this->initOmiseKeys();
@@ -264,7 +270,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
     				break;
     		}
     		if($postError) {
-				$_SESSION['plg_OmisePaymentGateway_error'] = '不正な入力を検知しました。再度お試しください。';
+				$_SESSION['plg_OmisePaymentGateway_error'] = '不正な入力を検知しました。再度お試しください。2';
 				SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
 				SC_Response_Ex::actionExit();
     		}
@@ -376,6 +382,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				return $omiseCustomer['id'];
 			}
 		} else {
+			$objQuery = &SC_Query_Ex::getSingletonInstance();
 			$orderTempID = $this->getOrderTempID();
 			$orderTemps = $objQuery->select('plg_omise_payment_gateway', 'dtb_order_temp', 'order_temp_id = ?', array($orderTempID));
 			
