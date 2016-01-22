@@ -19,14 +19,25 @@
 			<td><!--{$arrForm.plg_OmisePaymentGateway_create_date}--></td>
 		</tr>
 		<tr>
+			<th>ログ</th>
+			<td>
+			<!--{foreach from=$arrForm.plg_OmisePaymentGateway_logs item=value}-->
+				<!--{$value.initial}-->  <!--{$value.create_date}-->   <!--{$value.status}--><br/>
+			<!--{/foreach}-->
+			</td>
+		</tr>
+		<tr>
 			<th>処理</th>
 			<td>
-				<!--{if $arrForm.plg_OmisePaymentGateway_captured == true}-->
-					<input type="button" id="plg_OmisePaymentGateway_refund" value="返金"/>
-					<input type="button" id="plg_OmisePaymentGateway_refund" value="返金"/>
+				<!--{if $arrForm.plg_OmisePaymentGateway_no_charge == true}-->
+					<input type="button" id="plg_OmisePaymentGateway_re_charge" value="再オーソリ"/>
 				<!--{else}-->
-					<input type="button" id="plg_OmisePaymentGateway_charge_capture" value="売上確定"/>
-					<input type="button" id="plg_OmisePaymentGateway_amount_change" value="決済金額変更"/>
+					<!--{if $arrForm.plg_OmisePaymentGateway_captured == true}-->
+						<input type="button" id="plg_OmisePaymentGateway_refund" value="返金"/>
+					<!--{else}-->
+						<input type="button" id="plg_OmisePaymentGateway_charge_capture" value="売上確定"/>
+						<input type="button" id="plg_OmisePaymentGateway_amount_change" value="決済金額変更"/>
+					<!--{/if}-->
 				<!--{/if}-->
 			</td>
 		</tr>
@@ -53,6 +64,14 @@ $(function() {
 	$('#plg_OmisePaymentGateway_refund').click(function() {
 		if(confirm('返金処理を実行します。よろしいですか？')) {
 	        document.form1.mode.value = "plg_OmisePaymentGateway_refund";
+	        document.form1.submit();
+		}
+        return false;
+	});
+
+	$('#plg_OmisePaymentGateway_re_charge').click(function() {
+		if(confirm('再度オーソリをを実行します。よろしいですか？')) {
+	        document.form1.mode.value = "plg_OmisePaymentGateway_re_charge";
 	        document.form1.submit();
 		}
         return false;

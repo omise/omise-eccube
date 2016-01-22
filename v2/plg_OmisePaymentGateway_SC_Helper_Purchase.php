@@ -68,7 +68,8 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 					));
 				
 				// chargeidをオブジェクトとテーブルに反映
-				$omiseObject['charge'] = $omiseCharge['id'];
+				$omiseObject['charge'] = array();
+				$omiseObject['charge'][] = array('enable' => true, 'id' => $omiseCharge['id'], 'status' => '仮売上済み', 'create_date' => $omiseCharge['created'], 'amount' => $omiseCharge['amount'], 'captured' => false, 'refunds' => array());
 				$orderTemp['plg_omise_payment_gateway'] = serialize($omiseObject);
 				$count = $objQuery->update('dtb_order_temp', array('plg_omise_payment_gateway' => serialize($omiseObject), 'update_date' => 'CURRENT_TIMESTAMP'), "order_temp_id = '".$orderTemp['order_temp_id']."'");
 				if($count != 1) {

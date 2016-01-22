@@ -1,6 +1,7 @@
 <?php
 require_once PLUGIN_UPLOAD_REALDIR.'OmisePaymentGateway/omise-php/lib/Omise.php';
 class OmisePaymentGateway extends SC_Plugin_Base {
+	private $plg_OmisePaymentGateway_currency = 'thb';
 	const TBL_OMISE_CONFIG = 'plg_OmisePaymentGateway_config';
 	const CONFIG_PAYMENT = 'payment_config';
 	const CONFIG_OIMISE = 'omise_config';
@@ -327,26 +328,37 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = true;
 			$this->initOmiseKeys();
 			$objOmise = unserialize($objOrder['plg_omise_payment_gateway']);
+			$objCharge = null;
+			foreach ($objOmise['charge'] as $row) {
+				if($row['enable']) {
+					$objCharge = $row;
+					break;
+				}
+			}
+			$logs = array();
+			for ($i = (count($objOmise['charge']) - 1); $i >= 0; --$i) {
+				$logs[] = array(
+						'initial' => $objOmise['charge'][$i]['enable'] ? ' * ' : ' - ',
+						'create_date' => date("Y/m/d H:i:s", strtotime($objOmise['charge'][$i]['create_date'])),
+						'status' => $objOmise['charge'][$i]['status']
+					);
+			}
 			
-			$objOmiseCharge = OmiseCharge::retrieve($objOmise['charge']);
-
-			$objPage->arrForm['plg_OmisePaymentGateway_charge'] = $objOmise['charge'];
-			if($objOmiseCharge['captured']) {
-				$objPage->arrForm['plg_OmisePaymentGateway_captured'] = true;
-				$objPage->arrForm['plg_OmisePaymentGateway_status'] = '売上確定済み';
+			$objPage->arrForm['plg_OmisePaymentGateway_logs'] = $logs;
+			$objPage->arrForm['plg_OmisePaymentGateway_charge'] = $objCharge['id'];
+			$objPage->arrForm['plg_OmisePaymentGateway_captured'] = $objCharge['captured'];
+			$objPage->arrForm['plg_OmisePaymentGateway_status'] = $objCharge['status'];
+			$objPage->arrForm['plg_OmisePaymentGateway_create_date'] = date("Y/m/d H:i:s", strtotime($objCharge['create_date']));
+			if($objCharge['status'] == '返金済み') {
+				$objPage->arrForm['plg_OmisePaymentGateway_no_charge'] = true;
+				$objPage->arrForm['plg_OmisePaymentGateway_amount'] = '<strike>'.$objCharge['amount'].'円</strike>';
 			} else {
-				$objPage->arrForm['plg_OmisePaymentGateway_captured'] = false;
-				$objPage->arrForm['plg_OmisePaymentGateway_status'] = '仮売上済み';
-				$objPage->arrForm['plg_OmisePaymentGateway_status_warning'] = '※ 決済は完了していません。請求を確定する場合は ‘売上確定’ ボタンを押してください。';
+				$objPage->arrForm['plg_OmisePaymentGateway_no_charge'] = false;
+				$objPage->arrForm['plg_OmisePaymentGateway_amount'] = $objCharge['amount'].'円';
+				if($objCharge['amount'] != $objOrder['payment_total']) {
+					$objPage->arrForm['plg_OmisePaymentGateway_amount_warning'] = '※ お支払い合計が一致しません（'.$objOrder['payment_total'].'円）。変更する場合は ‘決済金額変更’ ボタンを押してください。';
+				}
 			}
-			$objPage->arrForm['plg_OmisePaymentGateway_amount'] = $objOmiseCharge['amount'].'円';
-			$objPage->arrForm['plg_OmisePaymentGateway_create_date'] = date("Y/m/d H:i:s", strtotime($objOmiseCharge['created']));
-			
-			if($objOmiseCharge['amount'] != $objOrder['payment_total']) {
-				$objPage->arrForm['plg_OmisePaymentGateway_amount_warning'] = '※ お支払い合計が一致しません（'.$objOrder['payment_total'].'円）。変更する場合は ‘決済金額変更’ ボタンを押してください。';
-			}
-			
-			// TODO 決済関係の確定処理の追加や、店舗管理者への警告を出してあげると親切
 		} else {
 			$objPage->arrForm['plg_OmisePaymentGateway_enabled'] = false;
 		}
@@ -360,6 +372,7 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	public function adminOrderEditActionBefore($objPage) {
 		switch ($objPage->getMode()) {
 			case 'plg_OmisePaymentGateway_charge_capture':
+				
 				$orderID = $_POST['order_id'];
 				$objQuery = &SC_Query_Ex::getSingletonInstance();
 				$objOrder = $objQuery->getRow('payment_total, plg_omise_payment_gateway', 'dtb_order', 'order_id = ?', array($orderID));
@@ -367,25 +380,96 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				
 				try {
 					$this->initOmiseKeys();
-					$objOmiseCharge = OmiseCharge::retrieve($objOmise['charge']);
+					$i = 0;
+					while($i < count($objOmise['charge'])) {
+						if($objOmise['charge'][$i]['enable']) break;
+						$i++;
+					}
+					$chargeID = $objOmise['charge'][$i]['id'];
+					$objOmiseCharge = OmiseCharge::retrieve($chargeID);
 					
 					if($objOmiseCharge['amount'] != $objOrder['payment_total']) {
 						throw new Exception('お支払合計が一致しないため決済できません。');
 					}
 					
 					$objOmiseCharge->capture();
-					$objPage->tpl_onload = 'window.alert("売上を確定しました。");';
+					$objOmise['charge'][$i]['captured'] = $objOmiseCharge['captured'];
+					if($objOmiseCharge['captured']) {
+						$objOmise['charge'][$i]['status'] = '売上確定済み';
+						$objQuery->update('dtb_order', array('plg_omise_payment_gateway' => serialize($objOmise), 'update_date' => 'CURRENT_TIMESTAMP'), "order_id = '$orderID'");
+						$objPage->tpl_onload = 'window.alert("売上を確定しました。");';
+					}
 				} catch(Exception $e) {
 					$objPage->tpl_onload = 'window.alert("エラーが発生しました : '.$e->getMessage().'。");';
 					break;
 				}
 				
 				break;
+				
 			case 'plg_OmisePaymentGateway_amount_change':
-				$objPage->tpl_onload = 'window.alert("金額を変更しました。");';
+			case 'plg_OmisePaymentGateway_re_charge':
+				$orderID = $_POST['order_id'];
+				$objQuery = &SC_Query_Ex::getSingletonInstance();
+				$objOrder = $objQuery->getRow('payment_total, plg_omise_payment_gateway', 'dtb_order', 'order_id = ?', array($orderID));
+				$objOmise = unserialize($objOrder['plg_omise_payment_gateway']);
+				
+				try {
+					$this->initOmiseKeys();
+					$i = 0;
+					while($i < count($objOmise['charge'])) {
+						if($objOmise['charge'][$i]['enable']) break;
+						$i++;
+					}
+					if($objPage->getMode() === 'plg_OmisePaymentGateway_amount_change') {
+						$objOmise['charge'][$i]['status'] = 'キャンセル（決済金額変更）';
+						$message = '決済金額を変更しました。';
+					} else {
+						$message = '再オーソリを実行しました。';
+					}
+					$objOmiseCharge = OmiseCharge::create(array(
+							'amount' => intval($objOrder['payment_total']),
+							'currency' => $this->plg_OmisePaymentGateway_currency,
+							'customer' => $objOmise['customer'],
+							'card' => $objOmise['card'],
+							'capture' => false
+						));
+					$objOmise['charge'][$i]['enable'] = false;
+					$objOmise['charge'][] = array('enable' => true, 'id' => $objOmiseCharge['id'], 'status' => '仮売上済み', 'create_date' => $objOmiseCharge['created'], 'amount' => $objOmiseCharge['amount'], 'captured' => false, 'refunds' => array());
+					$objQuery->update('dtb_order', array('plg_omise_payment_gateway' => serialize($objOmise), 'update_date' => 'CURRENT_TIMESTAMP'), "order_id = '$orderID'");
+				} catch(Exception $e) {
+					$objPage->tpl_onload = 'window.alert("エラーが発生しました : '.$e->getMessage().'。");';
+					break;
+				}
+				
+				$objPage->tpl_onload = 'window.alert("'.$message.'");';
 				break;
 				
 			case 'plg_OmisePaymentGateway_refund':
+				$orderID = $_POST['order_id'];
+				$objQuery = &SC_Query_Ex::getSingletonInstance();
+				$objOrder = $objQuery->getRow('payment_total, plg_omise_payment_gateway', 'dtb_order', 'order_id = ?', array($orderID));
+				$objOmise = unserialize($objOrder['plg_omise_payment_gateway']);
+				
+				try {
+					$this->initOmiseKeys();
+					$i = 0;
+					while($i < count($objOmise['charge'])) {
+						if($objOmise['charge'][$i]['enable']) break;
+						$i++;
+					}
+					$chargeID = $objOmise['charge'][$i]['id'];
+					$objOmiseCharge = OmiseCharge::retrieve($chargeID);
+					$refund = $objOmiseCharge->refunds()->create(array('amount' => intval($objOmiseCharge['amount'])));
+					$objOmise['charge'][$i]['status'] = '返金済み';
+					$objOmise['charge'][$i]['refunds'][] = $refund['amount'];
+					
+					$objQuery->update('dtb_order', array('plg_omise_payment_gateway' => serialize($objOmise), 'update_date' => 'CURRENT_TIMESTAMP'), "order_id = '$orderID'");
+					$objPage->tpl_onload = 'window.alert("返金を実行しました。");';
+				} catch(Exception $e) {
+					$objPage->tpl_onload = 'window.alert("エラーが発生しました : '.$e->getMessage().'。");';
+					break;
+				}
+				
 				break;
 				
 			default:
