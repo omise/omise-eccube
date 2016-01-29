@@ -34,9 +34,11 @@
 				<!--{else}-->
 					<!--{if $arrForm.plg_OmisePaymentGateway_captured == true}-->
 						<input type="button" id="plg_OmisePaymentGateway_refund" value="返金"/>
+						<input type="button" id="plg_OmisePaymentGateway_reload" value="最新の情報に更新"/>
 					<!--{else}-->
 						<input type="button" id="plg_OmisePaymentGateway_charge_capture" value="売上確定"/>
 						<input type="button" id="plg_OmisePaymentGateway_amount_change" value="決済金額変更"/>
+						<input type="button" id="plg_OmisePaymentGateway_reload" value="最新の情報に更新"/>
 					<!--{/if}-->
 				<!--{/if}-->
 			</td>
@@ -68,10 +70,18 @@ $(function() {
 		}
         return false;
 	});
-
+	
 	$('#plg_OmisePaymentGateway_re_charge').click(function() {
 		if(confirm('再度オーソリをを実行します。よろしいですか？')) {
 	        document.form1.mode.value = "plg_OmisePaymentGateway_re_charge";
+	        document.form1.submit();
+		}
+        return false;
+	});
+
+	$('#plg_OmisePaymentGateway_reload').click(function() {
+		if(confirm('仮売上中の決済をキャンセルします。よろしいですか？')) {
+	        document.form1.mode.value = "plg_OmisePaymentGateway_reload";
 	        document.form1.submit();
 		}
         return false;

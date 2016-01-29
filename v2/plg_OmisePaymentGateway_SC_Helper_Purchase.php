@@ -47,15 +47,15 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 		
 		try {
 			// Omise決済が選ばれているか判定
-			$omisePaymentInfo = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'payment_config'");
+			$omisePaymentInfo = $objQuery->select('info', 'plg_omisepaymentgateway_config', "name = 'payment_config'");
 			$omisePaymentInfo = unserialize($omisePaymentInfo[0]['info']);
 			if($orderTemp['payment_id'] == $omisePaymentInfo['credit_payment_id']) {
 				// Omiseへの接続情報の初期化
-				$omiseConfigInfo = $objQuery->select('info', 'plg_OmisePaymentGateway_config', "name = 'omise_config'");
+				$omiseConfigInfo = $objQuery->select('info', 'plg_omisepaymentgateway_config', "name = 'omise_config'");
 				$omiseConfigInfo = unserialize($omiseConfigInfo[0]['info']);
 				if(!defined('OMISE_PUBLIC_KEY')) define('OMISE_PUBLIC_KEY', $omiseConfigInfo['pkey']);
 				if(!defined('OMISE_SECRET_KEY')) define('OMISE_SECRET_KEY', $omiseConfigInfo['skey']);
-				
+
 				// Omise決済情報を取得
 				$omiseObject = unserialize($orderTemp['plg_omise_payment_gateway']);
 				// 仮売上計上
@@ -82,7 +82,6 @@ class plg_OmisePaymentGateway_SC_Helper_Purchase extends SC_Helper_Purchase {
 			}
 		} catch (Exception $e) {
 			$objQuery->rollback();
-			$this->rollbackOrder($uniqId);
 			$_SESSION['plg_OmisePaymentGateway_error'] = $e->getMessage();
 			SC_Response_Ex::sendRedirect(SHOPPING_PAYMENT_URLPATH);
 			SC_Response_Ex::actionExit();
