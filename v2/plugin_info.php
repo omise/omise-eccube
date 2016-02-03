@@ -4,8 +4,8 @@ class plugin_info {
     static $PLUGIN_CODE         = 'OmisePaymentGateway';
     static $CLASS_NAME          = 'OmisePaymentGateway';
     static $PLUGIN_NAME         = 'Omise Payment Gateway';
-    static $PLUGIN_VERSION      = '0.1';
-    static $COMPLIANT_VERSION   = '2.13.5';
+    static $PLUGIN_VERSION      = '0.2';
+    static $COMPLIANT_VERSION   = '2.13.0';
     static $AUTHOR              = 'Omise';
     static $DESCRIPTION         = 'Omise Payment Gateway';
     static $PLUGIN_SITE_URL     = 'https://www.omise.co';

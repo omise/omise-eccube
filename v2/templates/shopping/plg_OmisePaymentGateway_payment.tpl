@@ -76,6 +76,7 @@ function plg_OmisePaymentGateway_form_init() {
 	// クレジットカード選択時の挙動
 	var rdo_payments = document.getElementsByName('payment_id');
 	var rdo_pay_len = rdo_payments.length;
+	var displayUpdateFlg = false;
 	
 	for(i = 0; i < rdo_pay_len; ++i) {
 		rdo_payments[i].onchange = function() {
@@ -87,12 +88,17 @@ function plg_OmisePaymentGateway_form_init() {
 		};
 
 		if(rdo_payments[i].value == <!--{$arrForm.plg_OmisePaymentGateway_payment_id}-->) {
+			displayUpdateFlg = true;
 			if(rdo_payments[i].checked) {
 				document.getElementById('plg_omisepaymentgateway_credit').style.display = "block";
 			} else {
 				document.getElementById('plg_omisepaymentgateway_credit').style.display = "none";
 			}
 		}
+	}
+
+	if(displayUpdateFlg == false) {
+		document.getElementById('plg_omisepaymentgateway_credit').style.display = "none";
 	}
 }
 

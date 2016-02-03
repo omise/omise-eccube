@@ -102,7 +102,7 @@ class LC_Page_Plugin_OmisePaymentGateway_Config extends LC_Page_Admin_Ex {
      * @return void
      */
     public function destroy() {
-    	parent::destroy();
+    	
     }
     
     /**

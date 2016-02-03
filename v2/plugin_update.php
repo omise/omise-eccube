@@ -28,5 +28,22 @@ class plugin_update {
      * @param array $arrPlugin プラグイン情報の連想配列(dtb_plugin)
      * @return void
      */
-    function update($arrPlugin) { }
+    function update($arrPlugin) {
+//     	// バージョンの更新
+//     	$objQuery = SC_Query_Ex::getSingletonInstance();
+//     	$objQuery->begin();
+    	
+//     	$plugin_id = $arrPlugin['plugin_id'];
+//     	$plugin_version = '0.5';  // 新しいバージョン
+//     	$objQuery =& SC_Query_Ex::getSingletonInstance();
+//     	$sqlval = array();
+//     	$sqlval['plugin_version'] = $plugin_version;
+//     	$sqlval['update_date'] = 'CURRENT_TIMESTAMP';
+//     	$where = "plugin_id = ?";
+//     	$objQuery->update("dtb_plugin", $sqlval, $where, array($plugin_id));
+//     	$objQuery->commit();
+    	
+    	// 変更ファイルの上書き
+    	SC_Utils_Ex::copyDirectory(dirname(__FILE__).'/', PLUGIN_UPLOAD_REALDIR.$arrPlugin['plugin_code'].'/');
+    }
 }

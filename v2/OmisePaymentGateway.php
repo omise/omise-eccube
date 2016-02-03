@@ -5,12 +5,19 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 	const TBL_OMISE_CONFIG = 'plg_omisepaymentgateway_config';
 	const CONFIG_PAYMENT = 'payment_config';
 	const CONFIG_OIMISE = 'omise_config';
+	/**
+	 * @param array $arrPlugin
+	 */
+	public function update($arrPlugin) {
+		// Do Nothing
+	}
 	
 	/**
 	 * @param array $arrPlugin
 	 */
 	public function install($arrPlugin) {
 		$objQuery = &SC_Query_Ex::getSingletonInstance();
+    	$objQuery->begin();
 
 		// OmiseConfigテーブルの作成
 		$fields = [
@@ -61,7 +68,8 @@ class OmisePaymentGateway extends SC_Plugin_Base {
 				'create_date' => 'CURRENT_TIMESTAMP',
 				'update_date' => 'CURRENT_TIMESTAMP'
 		]);
-		
+		$objQuery->commit();
+	
 		// 受注テーブルにOmise用のカラムを追加
 		$objDb = new SC_Helper_DB_Ex();
 		$objDb->sfColumnExists('dtb_order_temp', 'plg_omise_payment_gateway', 'TEXT', '', true);
