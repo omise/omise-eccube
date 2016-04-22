@@ -54,16 +54,11 @@ define('OMISE_CONFIG_OMISE',      'free_field1');
 // EC-CUBE stores payment data to dtb_payment and we need to store this key to recognize which payment order used
 define('OMISE_CONFIG_PAYMENT_ID', 'free_field2');
 
-// ここは、テーブルを作って対処した方が良いと思う。
-// dtb_payment のメモカラムへこれらのデータを保管するのは危ないと思うの
-// 登録なしで購入すると、dtb_orderにしかレコードが残らない
-// とりあえず現状で動作するようにしてみるよ。
+// Store omise customer map array to dtb_payment.memo04
 define('OMISE_MDL_CUSTOMER_DATA_COL', 'memo04');
 
-// SC_Helper_Purchase
-// dtb_order で保管するっぽい
+// Store omise charge map array to dtb_order.memo01
 define('OMISE_MDL_CHARGE_DATA_COL',   'memo01');
-
 
 // Load Omise-PHP library and Config singleton class
 require_once OMISE_LIB_PHP_REALDIR . 'Omise.php';
