@@ -6,7 +6,6 @@
  * @author Akira Narita
  *
  */
-
 require_once PLUGIN_UPLOAD_REALDIR . "OmiseExt/inc/include.php";
 require_once OMISE_PAGES_REALDIR . "LC_Page_Plugin_Omise_Config.php";
 
