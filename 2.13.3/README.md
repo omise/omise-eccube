@@ -36,9 +36,7 @@ Omiseで行った決済には、ECCUBEのorder_idをCharge APIのdescriptionへ�
 
 ```sh
 git clone git@github.com:omise/omise-eccube.git
-cd omise-eccube
-git submodule update --init
-cd 2.13.3/OmiseExt
+cd omise-eccube/2.13.3/OmiseExt
 tar -cvzf ../OmiseExt.tar.gz *
 ```
 
