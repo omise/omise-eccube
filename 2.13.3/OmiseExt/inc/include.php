@@ -65,4 +65,6 @@ require_once OMISE_LIB_PHP_REALDIR . 'Omise.php';
 require_once OMISE_CLASS_REALDIR . 'OmiseConfig.php';
 
 // Define user agent on omise-php lib
-define(OMISE_USER_AGENT_SUFFIX, OMISE_PLUGIN_NAMESPACE . '/' . OMISE_PLUGIN_VERSION);
+define(OMISE_USER_AGENT_SUFFIX, OMISE_PLUGIN_NAMESPACE . '/' . OMISE_PLUGIN_VERSION . ' EC-CUBE/' . ECCUBE_VERSION);
+
+echo OMISE_USER_AGENT_SUFFIX;

@@ -32,15 +32,9 @@ Omiseで行った決済には、ECCUBEのorder_idをCharge APIのdescriptionへ�
 
 ## インストール方法
 
-このリポジトリを `git clone` し `OmiseExt.tar.gz` を作成します。
+こちらから[v2.13.3.0.tar.gz](https://github.com/omise/omise-eccube/archive/v2.13.3.0.tar.gz)をダウンロードします。
 
-```sh
-git clone git@github.com:omise/omise-eccube.git
-cd omise-eccube/2.13.3/OmiseExt
-tar -cvzf ../OmiseExt.tar.gz *
-```
-
-EC-CUBEの管理画面でオーナーズストアのプラグイン管理を開き、先ほど作成した `OmiseExt.tar.gz` を選択し、インストールボタンをクリックします。
+EC-CUBEの管理画面でオーナーズストアのプラグイン管理を開き、先ほど作成した `v2.13.3.0.tar.gz` を選択し、インストールボタンをクリックします。
 
 ![screen shot 2016-04-20 at 11 33 19](https://cloud.githubusercontent.com/assets/5040538/14663495/ba6ecc6c-06eb-11e6-8bfb-c5148951c901.png)
 
