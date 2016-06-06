@@ -1,0 +1,32 @@
+#!/bin/bash
+set -e
+
+BASE=$(cd $(dirname "$0") && pwd -P)
+
+run_tests() {
+    echo 1>&2 "WARNING: no tests run."
+}
+
+build_release() {
+    cd "$BASE"
+    mkdir -p release
+    cp README.md release/
+    tar czf release/eccube-omise.tar.gz \
+        class config.php inc logo.png mdl_omise \
+        OmiseExt.php omise-php plugin_info.php templates
+}
+
+commit_release() {
+    # Use https://github.com/cynic-net/git-commit-filetree here
+    echo 1>&2 "ERROR: commit_release not written!"
+    exit 1
+}
+
+run_tests
+build_release
+if [ _--commit = _"$1" ]; then
+    commit_release
+else
+    echo "Release tarball is in release/ subdir."
+    echo "Use --commit option to commit release to release branch."
+fi
