@@ -11,7 +11,7 @@ build_release() {
     cd "$BASE"
     mkdir -p release
     cp README.md release/
-    tar czf release/eccube-omise.tar.gz \
+    tar czf release/omise-eccube.tar.gz \
         class config.php inc logo.png mdl_omise \
         OmiseExt.php omise-php plugin_info.php templates
 }
