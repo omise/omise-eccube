@@ -282,6 +282,7 @@ class Omise_Models_Charge
     /**
      * Validate if charge is authorized.
      *
+     * @param  OmiseCharge  $charge
      * @return string|bool  The error message if occured
      */
     protected function validateChargeAuthorized($charge)
@@ -300,6 +301,7 @@ class Omise_Models_Charge
     /**
      * Validate if charge is captured.
      *
+     * @param  OmiseCharge  $charge
      * @return string|bool  The error message if occured
      */
     protected function validateChargeCaptured($charge)
