@@ -226,13 +226,18 @@ class Omise_Models_Charge
         }
 
         try {
-            $objCharge = OmiseWrapper::chargeCapture($this->getChargeId());
+            $charge = OmiseWrapper::chargeCapture($this->getChargeId());
+
+            $result = $this->validateChargeCaptured($charge);
+            if ($result !== true) {
+                throw new Exception($result);
+            }
         } catch (OmiseException $e) {
             return $e->getMessage();
         }
 
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($objCharge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($charge));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(
