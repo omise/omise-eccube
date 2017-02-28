@@ -13,7 +13,7 @@ build_release() {
     cp README.md release/
     tar czf release/omise-eccube.tar.gz \
         class config.php inc logo.png mdl_omise \
-        OmiseExt.php omise-php plugin_info.php templates
+        OmiseExt.php omise-php plugin_info.php plugin_update.php templates
 }
 
 commit_release() {
