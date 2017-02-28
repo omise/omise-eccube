@@ -145,13 +145,23 @@ class Omise_Models_Charge
     {
         $arrChargeParams = $this->lfComposeChargeParam($arrPayer);
         try {
-            $objCharge = OmiseWrapper::chargeCreate($arrChargeParams);
-        } catch (OmiseException $e) {
+            $charge = OmiseWrapper::chargeCreate($arrChargeParams);
+
+            if ($charge['capture']) {
+                $result = $this->validateChargeCaptured($charge);
+            } else {
+                $result = $this->validateChargeAuthorized($charge);
+            }
+
+            if ($result !== true) {
+                throw new Exception($result);
+            }
+        } catch (Exception $e) {
             return $e->getMessage();
         }
 
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($objCharge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($charge));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(
@@ -216,13 +226,18 @@ class Omise_Models_Charge
         }
 
         try {
-            $objCharge = OmiseWrapper::chargeCapture($this->getChargeId());
+            $charge = OmiseWrapper::chargeCapture($this->getChargeId());
+
+            $result = $this->validateChargeCaptured($charge);
+            if ($result !== true) {
+                throw new Exception($result);
+            }
         } catch (OmiseException $e) {
             return $e->getMessage();
         }
 
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($objCharge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($charge));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(
@@ -267,5 +282,43 @@ class Omise_Models_Charge
         $objPurchase->sendOrderMail($this->arrOrder['order_id']);
 
         return null;
+    }
+
+    /**
+     * Validate if charge is authorized.
+     *
+     * @param  OmiseCharge  $charge
+     * @return string|bool  The error message if occured
+     */
+    protected function validateChargeAuthorized($charge)
+    {
+        if (! isset($charge['object']) || $charge['object'] !== 'charge') {
+            return '注文情報の状態が不正です。<br>この手続きは無効となりました。';
+        }
+
+        if ($charge['status'] === 'pending' && $charge['authorized'] === true) {
+            return true;
+        }
+
+        return "支払いに失敗しました、" . $charge['failure_message'] . ' (' . $charge['failure_code'] . ')';
+    }
+
+    /**
+     * Validate if charge is captured.
+     *
+     * @param  OmiseCharge  $charge
+     * @return string|bool  The error message if occured
+     */
+    protected function validateChargeCaptured($charge)
+    {
+        if (! isset($charge['object']) || $charge['object'] !== 'charge') {
+            return '注文情報の状態が不正です。<br>この手続きは無効となりました。';
+        }
+
+        if ($charge['status'] === 'successful' && $charge['paid'] === true) {
+            return true;
+        }
+
+        return "支払いに失敗しました、" . $charge['failure_message'] . ' (' . $charge['failure_code'] . ')';
     }
 }
