@@ -1,0 +1,3 @@
+[submodule "2.13.3/OmiseExt/omise-php"]
+	path = 2.13.3/OmiseExt/omise-php
+	url = git@github.com:omise/omise-php.git
