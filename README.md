@@ -9,7 +9,7 @@
 
 ## ご利用方法
 
-インストールや設定の詳細は [公式ドキュメント](https://www.omise.co/eccube-plugin) を参照してください。
+インストールや設定の詳細は [公式ドキュメント](https://www.omise.co/ja/eccube-plugin) を参照してください。
 
 ## ご協力のお願い
 
