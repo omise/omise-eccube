@@ -3,7 +3,7 @@
 require_once dirname(__FILE__).'/obj/OmiseObject.php';
 require_once dirname(__FILE__).'/../exception/OmiseExceptions.php';
 
-define('OMISE_PHP_LIB_VERSION', '2.4.1');
+define('OMISE_PHP_LIB_VERSION', '2.4.1a');
 define('OMISE_API_URL', 'https://api.omise.co/');
 define('OMISE_VAULT_URL', 'https://vault.omise.co/');
 
@@ -229,9 +229,7 @@ class OmiseApiResource extends OmiseObject {
         // Time before the request is aborted when attempting to connect.
         CURLOPT_CONNECTTIMEOUT => $this->OMISE_CONNECTTIMEOUT,
         // Authentication.
-        CURLOPT_USERPWD => $userpwd,
-        // CA bundle.
-        CURLOPT_CAINFO => dirname(__FILE__).'/../../../data/ca_certificates.pem'
+        CURLOPT_USERPWD => $userpwd
     );
 
     // Config Omise API Version
