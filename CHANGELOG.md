@@ -1,5 +1,8 @@
 # CHANGELOG
 
+### v2.2 _(September 5, 2023)_
+- Removed hard-coded certificate (PR [#9](https://github.com/omise/omise-eccube/pull/12))
+
 ### v2.1 _(February 28, 2017)_
 
 #### 👾 Bug Fixes
