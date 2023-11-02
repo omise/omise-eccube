@@ -1,5 +1,18 @@
 # CHANGELOG
 
+### v2.3 _(November 2, 2023)
+
+Fix these bugs.
+
+- install plugin
+- update plugin
+- charge
+- capture
+- refund
+- change card
+- delete card
+- settings
+
 ### v2.2 _(September 5, 2023)_
 - Removed hard-coded certificate (PR [#9](https://github.com/omise/omise-eccube/pull/12))
 
