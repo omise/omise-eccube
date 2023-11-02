@@ -20,7 +20,14 @@ class OmiseObject implements ArrayAccess, Iterator, Countable {
       $this->_publickey = OMISE_PUBLIC_KEY;
     }
     if($secretkey !== null) {
-      $this->_secretkey = $secretkey;
+
+      // I don know why, but there is a pattern that is '$secretkey == $publickey'.
+      if($secretkey == $publickey){
+        $this->_secretkey = OMISE_SECRET_KEY;
+      }else{
+        $this->_secretkey = $secretkey;
+      }
+      
     } else {
       $this->_secretkey = OMISE_SECRET_KEY;
     }

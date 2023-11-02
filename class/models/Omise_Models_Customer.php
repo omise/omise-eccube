@@ -46,8 +46,9 @@ class Omise_Models_Customer
           return null;
       }
       $objCustomer = $this->lfFetchOmiseCustomer();
+      $objOmiseWrapper = new OmiseWrapper();
       if ($objCustomer !== null) {
-          $card = OmiseWrapper::customerDefaultCard($this->loadOmiseCustomerId());
+          $card = $objOmiseWrapper->customerDefaultCard($this->loadOmiseCustomerId());
           if($card !== null) {
               return $card['object'] === 'card' ? $card : null;
           } else {
@@ -79,7 +80,8 @@ class Omise_Models_Customer
       }
 
       // Delete old card, because we just allowed to store 1 card
-      OmiseWrapper::destoryAllCustomerCard($omise_id);
+      $objOmiseWrapper = new OmiseWrapper();
+      $objOmiseWrapper->destoryAllCustomerCard($omise_id);
 
       $omise_id = $this->lfUpdateOmiseCustomer($omise_id, $arrAttributes);
       $this->lfInsertOmiseCustomerId($omise_id);
@@ -95,7 +97,8 @@ class Omise_Models_Customer
       if ($this->lfIsNoCustomer()) {
           return;
       }
-      OmiseWrapper::customerDeleteDefaultCard($this->loadOmiseCustomerId());
+      $objOmiseWrapper = new OmiseWrapper();
+      $objOmiseWrapper->customerDeleteDefaultCard($this->loadOmiseCustomerId());
   }
 
   /**
@@ -122,7 +125,8 @@ class Omise_Models_Customer
       if ($omise_customer_id === null)
           return null;
       try {
-          $this->objOmiseCustomer = OmiseWrapper::customerRetrieve($omise_customer_id);
+          $objOmiseWrapper = new OmiseWrapper();
+          $this->objOmiseCustomer = $objOmiseWrapper->customerRetrieve($omise_customer_id);
       } catch (OmiseException $e) {
           $this->lfRemoveOmiseCustomerId();
       }
@@ -141,9 +145,10 @@ class Omise_Models_Customer
   {
       $updated = false;
       // Update Omise Customer by customer_id
+      $objOmiseWrapper = new OmiseWrapper();
       if ($omise_id !== null) {
           try {
-              $this->objOmiseCustomer = OmiseWrapper::customerUpdate($omise_id, $arrAttributes);
+              $this->objOmiseCustomer = $objOmiseWrapper->customerUpdate($omise_id, $arrAttributes);
               $updated = true;
           } catch (OmiseException $e) {
               throw $e;
@@ -151,7 +156,7 @@ class Omise_Models_Customer
       }
       // Create new Omise Customer
       if (!$updated) {
-          $this->objOmiseCustomer = OmiseWrapper::customerCreate($arrAttributes);
+          $this->objOmiseCustomer = $objOmiseWrapper->customerCreate($arrAttributes);
       }
 
       return $this->objOmiseCustomer['id'];

@@ -30,9 +30,10 @@ class Omise_Models_Charge
      */
     public function syncOmise()
     {
-        $objCharge   = OmiseWrapper::chargeRetrieve(self::getChargeId());
+        $objOmiseWrapper = new OmiseWrapper();
+        $objCharge   = $objOmiseWrapper->chargeRetrieve(self::getChargeId());
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($objCharge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($objCharge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(
@@ -145,7 +146,9 @@ class Omise_Models_Charge
     {
         $arrChargeParams = $this->lfComposeChargeParam($arrPayer);
         try {
-            $charge = OmiseWrapper::chargeCreate($arrChargeParams);
+            $objOmiseWrapper = new OmiseWrapper();
+
+            $charge = $objOmiseWrapper->chargeCreate($arrChargeParams);
 
             if ($charge['capture']) {
                 $result = $this->validateChargeCaptured($charge);
@@ -161,7 +164,7 @@ class Omise_Models_Charge
         }
 
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($charge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($charge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(
@@ -226,7 +229,8 @@ class Omise_Models_Charge
         }
 
         try {
-            $charge = OmiseWrapper::chargeCapture($this->getChargeId());
+            $objOmiseWrapper = new OmiseWrapper();
+            $charge = $objOmiseWrapper->chargeCapture($this->getChargeId());
 
             $result = $this->validateChargeCaptured($charge);
             if ($result !== true) {
@@ -237,7 +241,7 @@ class Omise_Models_Charge
         }
 
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($charge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($charge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(
@@ -261,13 +265,14 @@ class Omise_Models_Charge
     public function refund()
     {
         try {
-            $objCharge = OmiseWrapper::chargeRefund($this->getChargeId());
+            $objOmiseWrapper = new OmiseWrapper();
+            $objCharge = $objOmiseWrapper->chargeRefund($this->getChargeId());
         } catch (OmiseException $e) {
             return $e->getMessage();
         }
 
         $objPurchase = new SC_Helper_Purchase_Ex();
-        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => $this->lfConvertToDbChargeData($objCharge));
+        $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($objCharge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
         $objPurchase->sfUpdateOrderStatus(

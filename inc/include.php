@@ -12,7 +12,7 @@ define('OMISE_PLUGIN_CODE',           'OmiseExt');
 define('OMISE_MDL_CODE',              'mdl_omise');
 
 // Plugin version
-define('OMISE_PLUGIN_VERSION',        '2.2');
+define('OMISE_PLUGIN_VERSION',        '2.3');
 
 // Namespace
 define('OMISE_PLUGIN_NAMESPACE',      'OmiseECCUBE');

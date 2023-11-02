@@ -4,8 +4,8 @@ class plugin_info
     /* Required variables */
     static $PLUGIN_CODE       = 'OmiseExt';
     static $PLUGIN_NAME       = 'Omise決済プラグイン';
-    static $PLUGIN_VERSION    = '2.2';
-    static $COMPLIANT_VERSION = '2.13.3';
+    static $PLUGIN_VERSION    = '2.3';
+    static $COMPLIANT_VERSION = '2.17';
     static $AUTHOR            = 'Omise';
     static $DESCRIPTION       = 'Omise決済をEC-CUBEへ追加します。';
     static $PLUGIN_SITE_URL   = 'https://github.com/omise/omise-eccube';

@@ -20,7 +20,7 @@ class OmiseExt extends SC_Plugin_Base
      * @param  array $arrPlugin plugin_infoを元にDBに登録されたプラグイン情報(dtb_plugin)
      * @return void
      */
-    public function install($arrPlugin)
+    public static function install($arrPlugin, $objPluginInstaller = null)
     {
         OmiseConfig::getInstance()->install($arrPlugin);
     }
@@ -31,7 +31,7 @@ class OmiseExt extends SC_Plugin_Base
      * @param  array $arrPlugin プラグイン情報の連想配列(dtb_plugin)
      * @return void
      */
-    public function uninstall($arrPlugin)
+    public static function uninstall($arrPlugin, $objPluginInstaller = null)
     {
         OmiseConfig::getInstance()->uninstall($arrPlugin);
     }
@@ -44,7 +44,7 @@ class OmiseExt extends SC_Plugin_Base
      * @param  array $arrPlugin プラグイン情報の連想配列(dtb_plugin)
      * @return void
      */
-    public function enable($arrPlugin)
+    public static function enable($arrPlugin, $objPluginInstaller = null)
     {
         OmiseConfig::getInstance()->enableOmisePayment($arrPlugin);
     }
@@ -57,7 +57,7 @@ class OmiseExt extends SC_Plugin_Base
      * @param  array $arrPlugin プラグイン情報の連想配列(dtb_plugin)
      * @return void
      */
-    public function disable($arrPlugin)
+    public static function disable($arrPlugin, $objPluginInstaller = null)
     {
         OmiseConfig::getInstance()->disableOmisePayment($arrPlugin);
     }
@@ -153,3 +153,4 @@ class OmiseExt extends SC_Plugin_Base
         $objPage->plg_omiseext_objCharge = $objCharge;
     }
 }
+

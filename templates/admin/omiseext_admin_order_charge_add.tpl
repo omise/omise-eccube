@@ -12,14 +12,14 @@
 <!--
 function fnPlgOmiseExtCapture() {
   if(window.confirm('現在の金額で実売上化をおこないます。受注内容を変更中の場合はさきに保存してください。')) {
-    fnModeSubmit('plg_omiseext_capture', '', '');
+    eccube.setModeAndSubmit('plg_omiseext_capture', '', '');
   };
   return false;
 }
 
 function fnPlgOmiseExtRefund() {
   if(window.confirm('実売上化した金額を返金します。返金後は、この受注データに再度の課金を行うことはできませんのでご注意ください。')) {
-    fnModeSubmit('plg_omiseext_refund', '', '');
+    eccube.setModeAndSubmit('plg_omiseext_refund', '', '');
   };
   return false;
 }
