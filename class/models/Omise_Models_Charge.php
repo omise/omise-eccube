@@ -18,11 +18,15 @@ class Omise_Models_Charge
      * @var $arrOrder テーブルからロードした order のデータ
      */
     public $arrOrder;
+    
+    private $objOmiseWrapper;
+    private $objPurchase;
 
     public function __construct($order_id)
     {
-        $objPurchase    = new SC_Helper_Purchase_Ex();
-        $this->arrOrder = $objPurchase->getOrder($order_id);
+        $this->objPurchase    = new SC_Helper_Purchase_Ex();
+        $this->arrOrder = $this->objPurchase->getOrder($order_id);
+        $this->objOmiseWrapper = new OmiseWrapper();
     }
 
     /**
@@ -30,13 +34,11 @@ class Omise_Models_Charge
      */
     public function syncOmise()
     {
-        $objOmiseWrapper = new OmiseWrapper();
-        $objCharge   = $objOmiseWrapper->chargeRetrieve(self::getChargeId());
-        $objPurchase = new SC_Helper_Purchase_Ex();
+        $objCharge   = $this->objOmiseWrapper->chargeRetrieve(self::getChargeId());
         $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($objCharge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
-        $objPurchase->sfUpdateOrderStatus(
+        $this->objPurchase->sfUpdateOrderStatus(
             $this->arrOrder['order_id'],
             null, // 対応状況 ＊nullは変更なし
             null, // 加算ポイント ＊nullは変更なし
@@ -45,7 +47,7 @@ class Omise_Models_Charge
         );
         $objQuery->commit();
         $order_id = $this->arrOrder['order_id'];
-        $this->arrOrder = $objPurchase->getOrder($order_id);
+        $this->arrOrder = $this->objPurchase->getOrder($order_id);
     }
 
     /**
@@ -146,9 +148,8 @@ class Omise_Models_Charge
     {
         $arrChargeParams = $this->lfComposeChargeParam($arrPayer);
         try {
-            $objOmiseWrapper = new OmiseWrapper();
 
-            $charge = $objOmiseWrapper->chargeCreate($arrChargeParams);
+            $charge = $this->objOmiseWrapper->chargeCreate($arrChargeParams);
 
             if ($charge['capture']) {
                 $result = $this->validateChargeCaptured($charge);
@@ -163,11 +164,10 @@ class Omise_Models_Charge
             return $e->getMessage();
         }
 
-        $objPurchase = new SC_Helper_Purchase_Ex();
         $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($charge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
-        $objPurchase->sfUpdateOrderStatus(
+        $this->objPurchase->sfUpdateOrderStatus(
             $this->arrOrder['order_id'],
             (OmiseConfig::getInstance()->autocapture == 1) ? ORDER_PRE_END : ORDER_PAY_WAIT,
             null, // 加算ポイント
@@ -175,7 +175,7 @@ class Omise_Models_Charge
             $updateData
         );
         $objQuery->commit();
-        $objPurchase->sendOrderMail($this->arrOrder['order_id']);
+        $this->objPurchase->sendOrderMail($this->arrOrder['order_id']);
 
         return null;
     }
@@ -229,8 +229,7 @@ class Omise_Models_Charge
         }
 
         try {
-            $objOmiseWrapper = new OmiseWrapper();
-            $charge = $objOmiseWrapper->chargeCapture($this->getChargeId());
+            $charge = $this->objOmiseWrapper->chargeCapture($this->getChargeId());
 
             $result = $this->validateChargeCaptured($charge);
             if ($result !== true) {
@@ -240,11 +239,10 @@ class Omise_Models_Charge
             return $e->getMessage();
         }
 
-        $objPurchase = new SC_Helper_Purchase_Ex();
         $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($charge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
-        $objPurchase->sfUpdateOrderStatus(
+        $this->objPurchase->sfUpdateOrderStatus(
             $this->arrOrder['order_id'],
             ORDER_PRE_END,
             null, // 加算ポイント
@@ -253,7 +251,7 @@ class Omise_Models_Charge
         );
 
         $objQuery->commit();
-        $objPurchase->sendOrderMail($this->arrOrder['order_id']);
+        $this->objPurchase->sendOrderMail($this->arrOrder['order_id']);
 
         return null;
     }
@@ -265,17 +263,15 @@ class Omise_Models_Charge
     public function refund()
     {
         try {
-            $objOmiseWrapper = new OmiseWrapper();
-            $objCharge = $objOmiseWrapper->chargeRefund($this->getChargeId());
+            $objCharge = $this->objOmiseWrapper->chargeRefund($this->getChargeId());
         } catch (OmiseException $e) {
             return $e->getMessage();
         }
 
-        $objPurchase = new SC_Helper_Purchase_Ex();
         $updateData  = array(OMISE_MDL_CHARGE_DATA_COL => serialize($this->lfConvertToDbChargeData($objCharge)));
         $objQuery    = SC_Query_Ex::getSingletonInstance();
         $objQuery->begin();
-        $objPurchase->sfUpdateOrderStatus(
+        $this->objPurchase->sfUpdateOrderStatus(
             $this->arrOrder['order_id'],
             ORDER_CANCEL,
             null, // 加算ポイント
@@ -284,7 +280,7 @@ class Omise_Models_Charge
         );
 
         $objQuery->commit();
-        $objPurchase->sendOrderMail($this->arrOrder['order_id']);
+        $this->objPurchase->sendOrderMail($this->arrOrder['order_id']);
 
         return null;
     }
