@@ -112,7 +112,9 @@ class OmiseExt extends SC_Plugin_Base
             if (empty($order_id)) {
                 return;
             }
-            $objCharge = new Omise_Models_Charge($order_id);
+            $helperPurchase = new SC_Helper_Purchase_Ex();
+            $objWrapper = new OmiseWrapper();
+            $objCharge = new Omise_Models_Charge($order_id, $helperPurchase, $objWrapper);
             $message = $objCharge->capture();
             if ($message !== null) {
                 $objPage->plg_omiseext_capture_error = $message;
@@ -128,7 +130,10 @@ class OmiseExt extends SC_Plugin_Base
             if (empty($order_id)) {
                 return;
             }
-            $objCharge = new Omise_Models_Charge($order_id);
+            $helperPurchase = new SC_Helper_Purchase_Ex();
+            $objWrapper = new OmiseWrapper();
+            $objCharge = new Omise_Models_Charge($order_id, $helperPurchase, $objWrapper);
+
             $message = $objCharge->refund();
             if ($message !== null) {
                 $objPage->plg_omiseext_refund_error = $message;
@@ -147,8 +152,10 @@ class OmiseExt extends SC_Plugin_Base
             return;
         }
 
-        $objCharge = new Omise_Models_Charge($order_id);
-        // Sync Omise Charge data with ECCUBE db
+        $helperPurchase = new SC_Helper_Purchase_Ex();
+        $objWrapper = new OmiseWrapper();
+        $objCharge = new Omise_Models_Charge($order_id, $helperPurchase, $objWrapper);
+    // Sync Omise Charge data with ECCUBE db
         $objCharge->syncOmise();
         $objPage->plg_omiseext_objCharge = $objCharge;
     }

@@ -22,11 +22,15 @@ class Omise_Models_Charge
     private $objOmiseWrapper;
     private $objPurchase;
 
-    public function __construct($order_id)
+    public function __construct(
+        $order_id,
+        SC_Helper_Purchase_Ex $helperPurchase,
+        OmiseWrapper $omiseWrapper
+    )
     {
-        $this->objPurchase    = new SC_Helper_Purchase_Ex();
+        $this->objPurchase    = $helperPurchase;
         $this->arrOrder = $this->objPurchase->getOrder($order_id);
-        $this->objOmiseWrapper = new OmiseWrapper();
+        $this->objOmiseWrapper = $omiseWrapper;
     }
 
     /**
