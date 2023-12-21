@@ -1,15 +1,15 @@
 <!--- KEEP START --->
-[![Omise](https://cdn.omise.co/assets/omise.png)](https://www.omise.co/developers)
+[![Opn Payments](https://www.opn.ooo/assets/svg/logo-opn-full.svg)](https://www.opn.ooo)
 
-[Omise](https://www.omise.co/ja)は、タイ、日本、シンガポールでサービスを提供する決済サービスプロバイダーです。
-どのような規模の加盟店でも、Omiseが提供するAPIを活用し、オンライン決済を受領することができます。
+[Opn Paynents](https://www.opn.ooo/jp-ja/)は、タイ、日本、シンガポールでサービスを提供する決済サービスプロバイダーです。
+どのような規模の加盟店でも、Opn Paynentsが提供するAPIを活用し、オンライン決済を受領することができます。
 <!--- KEEP END --->
 
-**Omise EC-CUBE**は、Omiseを介してEC-CUBE上での決済処理をサポートする公式プラグインです。
+**Omise EC-CUBE**は、Opn Paymentsを介してEC-CUBE上での決済処理をサポートする公式プラグインです。
 
 ## ご利用方法
 
-インストールや設定の詳細は [公式ドキュメント](https://www.omise.co/ja/eccube-plugin) を参照してください。
+インストールや設定の詳細は [公式ドキュメント](https://docs.opn.ooo/ja/eccube-plugin/japan) を参照してください。
 
 ## ご協力のお願い
 
