@@ -14,7 +14,7 @@
     <h2 class="title"><!--{$tpl_title|h}--></h2>
 
 
-    <!--{if count($arrErr) > 0}-->
+    <!--{if gettype($arrErr) == "array" && count($arrErr) > 0}-->
       <p class="remark attention omise-notice"><!--{foreach from=$arrErr item=errorMessage}-->
       <!--{$errorMessage}-->
       <!--{/foreach}--></p>

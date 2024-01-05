@@ -57,7 +57,8 @@ class LC_Page_Mdl_Omise_Payment extends LC_Page_Ex
         }
 
         $objPurchase     = new SC_Helper_Purchase_Ex();
-        $objCharge       = new Omise_Models_Charge($order_id);
+        $objWrapper      = new OmiseWrapper();
+        $objCharge       = new Omise_Models_Charge($order_id, $objPurchase, $objWrapper);
         $this->tpl_title = $objCharge->arrOrder['payment_method'];
 
         $this->validateOrderConsistency($objCharge->arrOrder);

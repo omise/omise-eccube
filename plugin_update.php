@@ -7,7 +7,7 @@ class plugin_update
      *
      * @return void
      */
-    public function update(array $plugin_info, SC_Plugin_Installer $installer)
+    public static function update(array $plugin_info, SC_Plugin_Installer $installer)
     {
         copy(
             DOWNLOADS_TEMP_PLUGIN_UPDATE_DIR . "class/models/Omise_Models_Charge.php",

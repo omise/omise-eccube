@@ -108,7 +108,7 @@ class OmiseConfig
      */
     public function updateOmise($array)
     {
-        $this->updatePluginFreeField(serialize($array), OMISE_CONFIG_OMISE);
+        return $this->updatePluginFreeField(serialize($array), OMISE_CONFIG_OMISE);
     }
 
     /**

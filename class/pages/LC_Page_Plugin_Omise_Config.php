@@ -68,7 +68,9 @@ class LC_Page_Plugin_Omise_Config extends LC_Page_Admin_Ex
                 if (count($this->arrErr) == 0) {
                     // Update config data on to dtb_plugin table, where plugin_code = "OmiseExt"
                     // Updation error check
-                    if (count(OmiseConfig::getInstance()->updateOmise($arrForm)) == 0) {
+                    $result = OmiseConfig::getInstance()->updateOmise($arrForm);
+
+                    if (gettype($result) != "array") {
                         $this->tpl_onload = "alert('登録しました。');";
                     } else {
                         $this->tpl_onload = "alert('登録に失敗しました。再度お試しください。);";
